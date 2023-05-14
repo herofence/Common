@@ -1,4 +1,4 @@
-# openwrt-rockchip-armv8-friendlyarm_nanopi-r2s
+# openwrt-rockchip-X64
 `.github/workflow`*代码仓库<br>*
 `Config/General.txt`*增加/删除插件设置<br>*
 `Config/R2S.txt openwrt`*系统中添加r2s机器信息<br>*
