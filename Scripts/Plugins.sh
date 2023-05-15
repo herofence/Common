@@ -14,3 +14,4 @@ git clone --depth=1 --single-branch https://github.com/gngpp/luci-app-design-con
 #git clone https://github.com/xiaorouji/openwrt-passwall package/openwrt-passwall
 #git clone --depth=1 --single-branch https://github.com/xiaorouji/openwrt-passwall.git
 #git clone https://github.com/xiaorouji/openwrt-passwall.git
+#git clone https://github.com/kenzok8/small-package package/small-package
