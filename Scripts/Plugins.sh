@@ -11,5 +11,5 @@ git clone --depth=1 --single-branch https://github.com/jerrykuku/luci-app-argon-
 git clone --depth=1 --single-branch https://github.com/gngpp/luci-theme-design.git
 git clone --depth=1 --single-branch https://github.com/gngpp/luci-app-design-config.git
 #Passwall
-git clone --depth=1 --single-branch "luci" https://github.com/xiaorouji/openwrt-passwall.git ./pw_luci
-git clone --depth=1 --single-branch "packages" https://github.com/xiaorouji/openwrt-passwall.git ./pw_packages
+git clone --depth=1 --single-branch --branch "luci" https://github.com/xiaorouji/openwrt-passwall.git ./pw_luci
+git clone --depth=1 --single-branch --branch "packages" https://github.com/xiaorouji/openwrt-passwall.git ./pw_packages
