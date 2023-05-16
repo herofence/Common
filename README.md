@@ -6,7 +6,7 @@
 `Scripts/Extras.sh`*openwrt界面设置<br>*
 `Scripts/Renames.sh`*openwrt重命名<br>*
 `Depends.txt`*云编译过程中需要加载的依赖文件<br>*
-云编译OpenWRT固件，源码来自LEDE，编译菜单来自VIKINGYFY，openwrt插件来自xiaorouji，感谢三位。<br>
+云编译OpenWRT固件，源码来自LEDE，编译菜单来自VIKINGYFY，passwall插件来自xiaorouji，感谢三位。<br>
 https://github.com/coolsnowwolf/lede<br>
 https://github.com/xiaorouji/openwrt-passwall<br>
 https://github.com/VIKINGYFY/OpenWRT-CI<br>
