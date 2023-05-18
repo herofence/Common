@@ -34,6 +34,7 @@ CONFIG_PACKAGE_luci-app-linkease=n
 CONFIG_PACKAGE_luci-app-quickstart=n
 CONFIG_PACKAGE_luci-app-store=n
 CONFIG_PACKAGE_luci-app-unishare=n
+CONFIG_PACKAGE_luciluci-app-wireguard=
 #ACME证书申请
 CONFIG_PACKAGE_luci-app-acme=n
 #高级菜单
