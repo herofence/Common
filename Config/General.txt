@@ -8,7 +8,7 @@ CONFIG_PACKAGE_ipv6helper=y
 CONFIG_PACKAGE_ip6tables-extra=y
 CONFIG_PACKAGE_ip6tables-mod-nat=y
 #广告屏蔽大师
-CONFIG_PACKAGE_luci-app-adbyby-plus=y
+CONFIG_PACKAGE_luci-app-adbyby-plus=n
 #定时重启
 CONFIG_PACKAGE_luci-app-autoreboot=y
 #磁盘管理
@@ -16,7 +16,7 @@ CONFIG_PACKAGE_luci-app-diskman=y
 #防火墙
 CONFIG_PACKAGE_luci-app-firewall=y
 #网络代理
-CONFIG_PACKAGE_luci-app-passwall=y
+CONFIG_PACKAGE_luci-app-passwall=n
 #UPNP重定向
 CONFIG_PACKAGE_luci-app-upnp=y
 #单线程http服务器
@@ -26,7 +26,7 @@ CONFIG_PACKAGE_luci-app-wol=y
 #内网穿透
 CONFIG_PACKAGE_luci-app-zerotier=y
 #docker容器管理
-CONFIG_PACKAGE_luci-app-dockerman=y
+CONFIG_PACKAGE_luci-app-dockerman=n
 #易有云插件
 CONFIG_PACKAGE_luci-app-ddnsto=n
 CONFIG_PACKAGE_luci-app-istorex=n
@@ -34,7 +34,7 @@ CONFIG_PACKAGE_luci-app-linkease=n
 CONFIG_PACKAGE_luci-app-quickstart=n
 CONFIG_PACKAGE_luci-app-store=n
 CONFIG_PACKAGE_luci-app-unishare=n
-CONFIG_PACKAGE_luciluci-app-wireguard=
+CONFIG_PACKAGE_luciluci-app-wireguard=n
 #ACME证书申请
 CONFIG_PACKAGE_luci-app-acme=n
 #高级菜单
