@@ -43,6 +43,8 @@ CONFIG_PACKAGE_luci-app-advanced=n
 CONFIG_PACKAGE_luci-app-accesscontrol=n
 #打印机共享服务
 CONFIG_PACKAGE_autosamba=n
+#解锁网易云音乐
+CONFIG_PACKAGE_luci-app-unblockmusic=n
 #其它
 CONFIG_PACKAGE_luci-app-bird1-ipv4=n
 CONFIG_PACKAGE_luci-app-bird1-ipv6=n
