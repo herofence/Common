@@ -1,5 +1,5 @@
 #CI项目名
-name: Fros-Rockchip
+name: Rockchip-Fros
 
 on:
   #手动编译
