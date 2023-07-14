@@ -1,4 +1,4 @@
-#R2C R2S R4S R5C R66S R68S H66K H68K
+#R2C R2S R4S
 # Automatically generated file; DO NOT EDIT.
 # OpenWrt Configuration
 #
