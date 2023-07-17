@@ -131,7 +131,7 @@ jobs:
           du -h --max-depth=1
           echo "======================="
 
-      - name: 编译软件
+      - name: 导出配置文件
         run: |
           cd ./owrt && mkdir ./upload
 
