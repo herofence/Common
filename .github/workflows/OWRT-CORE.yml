@@ -150,7 +150,7 @@ jobs:
           files: ./owrt/upload/*.*
           body: |
             这是个平台固件包，内含多个设备！
-            请注意选择你需要的设备固件！
+            passwall、dockerman、IPV6
 
             源码：${{env.OWRT_SOURCE}}
             平台：${{env.OWRT_TARGET}}
