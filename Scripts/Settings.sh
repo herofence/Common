@@ -1,7 +1,6 @@
 #!/bin/bash
 
 #删除冲突插件
-#查找基于".*\(argon\|design\|openclash\).*"目录下的所有文件并删除
 rm -rf $(find ./feeds/luci/ -type d -regex ".*\(argon\|design\|openclash\).*")
 #修改默认主题
 sed -i "s/luci-theme-bootstrap/luci-theme-$OWRT_THEME/g" $(find ./feeds/luci/collections/ -type f -name "Makefile")
