@@ -19,3 +19,5 @@ git clone --depth=1 --single-branch https://github.com/xiaorouji/openwrt-passwal
 git clone --depth=1 --single-branch https://github.com/xiaorouji/openwrt-passwall-packages.git
 #Hello World
 git clone --depth=1 --single-branch https://github.com/fw876/helloworld.git
+#OpenAppFilter
+git clone --depth=1 --single-branch https://github.com/destan19/OpenAppFilter.git
