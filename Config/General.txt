@@ -44,6 +44,8 @@ CONFIG_PACKAGE_luci-app-quickstart=y
 CONFIG_PACKAGE_luci-app-store=n
 CONFIG_PACKAGE_luci-app-unishare=n
 CONFIG_PACKAGE_luci-app-wireguard=n
+#IPTV
+CONFIG_PACKAGE_msd_lite=y
 #不需要的插件
 #广告屏蔽大师
 CONFIG_DEFAULT_luci-app-adbyby-plus=n
