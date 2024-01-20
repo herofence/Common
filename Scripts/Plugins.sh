@@ -22,12 +22,6 @@ git clone --depth=1 --single-branch https://github.com/xiaorouji/openwrt-passwal
 #应用过滤器
 #git clone --depth=1 --single-branch https://github.com/destan19/OpenAppFilter.git
 #预置OpenClash内核和数据
-git init
-git remote add -f origin https://github.com/vernesong/OpenClash.git
-git config core.sparsecheckout true
-echo "luci-app-openclash" >> .git/info/sparse-checkout
-git pull --depth 1 origin master
-git branch --set-upstream-to=origin/master master
 if [ -d *"OpenClash"* ]; then
 	CORE_VER="https://raw.githubusercontent.com/vernesong/OpenClash/core/dev/core_version"
 	CORE_TYPE=$(echo $WRT_TARGET | egrep -iq "64|86" && echo "amd64" || echo "arm64")
