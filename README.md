@@ -10,3 +10,4 @@
 https://github.com/coolsnowwolf/lede<br>
 https://github.com/xiaorouji/openwrt-passwall<br>
 https://github.com/VIKINGYFY/OpenWRT-CI<br>
+https://github.com/vernesong/OpenClash
