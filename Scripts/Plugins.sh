@@ -51,4 +51,22 @@ if [ -d *"OpenClash"* ]; then
 	chmod +x ./clash* && rm -rf ./*.gz
 	echo "openclash date has been updated!"
 fi
+UPDATE_PACKAGE() {
+	local PKG_NAME=$1
+	local PKG_REPO=$2
+	local PKG_BRANCH=$3
+	local PKG_SPECIAL=$4
+	local REPO_NAME=$(echo $PKG_REPO | cut -d '/' -f 2)
+
+	rm -rf $(find ../feeds/luci/ -type d -iname "*$PKG_NAME*" -prune)
+
+	git clone --depth=1 --single-branch --branch $PKG_BRANCH "https://github.com/$PKG_REPO.git"
+
+	if [[ $PKG_SPECIAL == "pkg" ]]; then
+		cp -rf $(find ./$REPO_NAME/ -type d -iname "*$PKG_NAME*" -prune) ./
+		rm -rf ./$REPO_NAME
+	elif [[ $PKG_SPECIAL == "name" ]]; then
+		mv -f $REPO_NAME $PKG_NAME
+	fi
+}
 UPDATE_PACKAGE "openclash" "vernesong/OpenClash" "dev"
