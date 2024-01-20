@@ -51,3 +51,4 @@ if [ -d *"OpenClash"* ]; then
 	chmod +x ./clash* && rm -rf ./*.gz
 	echo "openclash date has been updated!"
 fi
+UPDATE_PACKAGE "openclash" "vernesong/OpenClash" "dev"
