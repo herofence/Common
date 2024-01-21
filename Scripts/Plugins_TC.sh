@@ -5,10 +5,7 @@ git clone --depth=1 --single-branch https://github.com/linkease/istore.git
 git clone --depth=1 --single-branch https://github.com/linkease/nas-packages.git
 git clone --depth=1 --single-branch https://github.com/linkease/nas-packages-luci.git
 #Design Theme
-if [[ $OWRT_URL == *"lede"* ]] ; then
   git clone --depth=1 --single-branch --branch "main" https://github.com/gngpp/luci-theme-design.git
-else
-  git clone --depth=1 --single-branch --branch "js" https://github.com/papagaye744/luci-theme-design.git
 fi
 git clone --depth=1 --single-branch https://github.com/gngpp/luci-app-design-config.git
 #Argon Theme
