@@ -8,9 +8,9 @@ CONFIG_PACKAGE_ipv6helper=y
 CONFIG_PACKAGE_ip6tables-extra=y
 CONFIG_PACKAGE_ip6tables-mod-nat=y
 #USB打印服务器
-CONFIG_PACKAGE_autosamba=y
-CONFIG_PACKAGE_kmod-usb-printer=y
-CONFIG_PACKAGE_luci-app-usb-printer=y
+CONFIG_PACKAGE_autosamba=n
+CONFIG_PACKAGE_kmod-usb-printer=n
+CONFIG_PACKAGE_luci-app-usb-printer=n
 #定时重启
 CONFIG_PACKAGE_luci-app-autoreboot=y
 #磁盘管理
@@ -18,9 +18,9 @@ CONFIG_PACKAGE_luci-app-diskman=y
 #防火墙
 CONFIG_PACKAGE_luci-app-firewall=y
 #网络代理
-CONFIG_PACKAGE_luci-app-passwall=n
-CONFIG_PACKAGE_luci-app-ssr-plus=y
-CONFIG_PACKAGE_luci-app-openclash=y
+CONFIG_PACKAGE_luci-app-passwall=y
+CONFIG_PACKAGE_luci-app-ssr-plus=n
+CONFIG_PACKAGE_luci-app-openclash=n
 #UPNP重定向
 CONFIG_PACKAGE_luci-app-upnp=y
 #网络加速
