@@ -1,5 +1,7 @@
 #!/bin/bash
 
+#lucky
+git clone --depth=1 --single-branch https://github.com/gdy666/luci-app-lucky.git
 #Linkease
 git clone --depth=1 --single-branch https://github.com/linkease/istore.git
 git clone --depth=1 --single-branch https://github.com/linkease/nas-packages.git
