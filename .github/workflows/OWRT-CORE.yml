@@ -148,7 +148,7 @@ jobs:
           tag_name: ${{env.OWRT_TARGET}}_${{env.OWRT_SOURCE}}_${{env.OWRT_DATE}}
           files: ./owrt/upload/*.*
           body: |
-            包含docker、passwall、IPV6、打印机驱动
+            包含passwall、IPV6、打印机驱动
 
             源码：${{env.OWRT_SOURCE}}
             平台：${{env.OWRT_TARGET}}
