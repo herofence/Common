@@ -41,6 +41,7 @@ CONFIG_PACKAGE_luci-app-uhttpd=y
 #DDNS-GO
 CONFIG_PACKAGE_ddns-go=y
 CONFIG_DEFAULT_luci-app-ddns=n
+CONFIG_PACKAGE_ddns-scripts_cloudflare.com-v4=y
 #stun
 CONFIG_PACKAGE_stun-client=y
 CONFIG_PACKAGE_stund=y
