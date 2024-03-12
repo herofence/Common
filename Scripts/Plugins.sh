@@ -23,3 +23,5 @@ git clone --depth=1 --single-branch https://github.com/xiaorouji/openwrt-passwal
 #git clone --depth=1 --single-branch https://github.com/destan19/OpenAppFilter.git
 #DDNS-GO
 git clone --depth=1 --single-branch https://github.com/sirpdboy/luci-app-ddns-go.git
+#stun
+git clone --depth=1 --single-branch https://github.com/awe1p/stun.git
