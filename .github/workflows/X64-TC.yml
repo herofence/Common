@@ -1,10 +1,7 @@
 #CI项目名
-name: X64-Lede
+name: X64-TC
 
 on:
-  #自动编译：每天早上4点
-  #schedule:
-    #- cron: 0 20 * * *
   #手动编译
   workflow_dispatch:
 
