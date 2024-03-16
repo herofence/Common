@@ -1,5 +1,5 @@
 #CI项目名
-name: X64-TC
+name: X64-Lede
 
 on:
   #手动编译
@@ -11,8 +11,8 @@ permissions: write-all
 #CI任务
 jobs:
   owrt_config:
-    #调用公用编译核心OWRT-TC.yml
-    uses: ./.github/workflows/OWRT-TC.yml
+    #调用公用编译核心OWRT-CORE.yml
+    uses: ./.github/workflows/OWRT-CORE.yml
     with:
       #编译平台，X64包含X86
       OWRT_TARGET: X64
