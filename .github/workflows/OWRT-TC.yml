@@ -1,5 +1,6 @@
+
 #云编译公用核心
-name: OWRT-TC
+name: OWRT-CORE
 
 on:
   #公用核心标识
@@ -93,14 +94,14 @@ jobs:
 
           cd ./package
 
-          $GITHUB_WORKSPACE/Scripts/Plugins_TC.sh
+          $GITHUB_WORKSPACE/Scripts/Plugins.sh
 
       - name: 生成配置文件
         run: |
           cd ./owrt
 
           rm -rf ./tmp* ./.config*
-          cat $GITHUB_WORKSPACE/Config/$OWRT_TARGET.txt $GITHUB_WORKSPACE/Config/General_TC.txt >> .config
+          cat $GITHUB_WORKSPACE/Config/$OWRT_TARGET.txt $GITHUB_WORKSPACE/Config/General.txt >> .config
 
           $GITHUB_WORKSPACE/Scripts/Extras.sh
 
@@ -148,7 +149,7 @@ jobs:
           tag_name: ${{env.OWRT_TARGET}}_${{env.OWRT_SOURCE}}_${{env.OWRT_DATE}}
           files: ./owrt/upload/*.*
           body: |
-            包含docker、passwall、IPV6、打印机驱动
+            包含passwall、IPV6、打印机驱动
 
             源码：${{env.OWRT_SOURCE}}
             平台：${{env.OWRT_TARGET}}
