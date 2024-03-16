@@ -1,220 +1,157 @@
-#云编译公用核心
-name: WRT-TC
+# 公用编译核心
+name: main
 
 on:
   workflow_call:
     inputs:
-      WRT_BRANCH:
+      FIRENAME:
         required: true
         type: string
-      WRT_TARGET:
+      FIRENAME1:
         required: true
         type: string
-      WRT_THEME:
+      REPO_URL:
         required: true
         type: string
-      WRT_NAME:
+      REPO_BRANCH:
         required: true
         type: string
-      WRT_WIFI:
+      UPLOAD_RELEASE:
         required: true
-        type: string
-      WRT_URL:
-        required: true
-        type: string
-      WRT_IP:
-        required: true
-        type: string
-      WRT_PW:
-        required: true
-        type: string
-      WRT_CFG:
-        required: false
-        default: 'false'
         type: string
 
 env:
-  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
-  WRT_BRANCH: ${{inputs.WRT_BRANCH}}
-  WRT_TARGET: ${{inputs.WRT_TARGET}}
-  WRT_THEME: ${{inputs.WRT_THEME}}
-  WRT_NAME: ${{inputs.WRT_NAME}}
-  WRT_WIFI: ${{inputs.WRT_WIFI}}
-  WRT_URL: ${{inputs.WRT_URL}}
-  WRT_IP: ${{inputs.WRT_IP}}
-  WRT_PW: ${{inputs.WRT_PW}}
-  WRT_CFG: ${{inputs.WRT_CFG}}
+  FIRENAME: ${{inputs.FIRENAME}}
+  FIRENAME1: ${{inputs.FIRENAME1}}
+  REPO_URL: ${{inputs.REPO_URL}}
+  REPO_BRANCH: ${{inputs.REPO_BRANCH}}
+  UPLOAD_RELEASE: ${{inputs.UPLOAD_RELEASE}}
 
 jobs:
-  wrt_core:
-    runs-on: ubuntu-latest
+  builds:
+    runs-on: ubuntu-22.04
     steps:
-      - name: Checkout Projects
-        uses: actions/checkout@main
-
-      - name: Free Disk Space
-        uses: endersonmenezes/free-disk-space@main
-        with:
-          remove_android: true
-          remove_dotnet: true
-          remove_haskell: true
-          remove_tool_cache: true
-          remove_swap: true
-          remove_packages: "android* azure* clang* dotnet* firefox* ghc* golang* google* libclang* libgl1* \
-            lld* llvm* microsoft* mongodb* mono* mysql* nodejs* openjdk* php* postgresql* powershell* snap* temurin* yarn* zulu*"
-          remove_packages_one_command: true
-          remove_folders: "/etc/apt/sources.list.d* /etc/mono* /etc/mysql* /usr/include/linux/android* /usr/lib/llvm* /usr/lib/mono* \
-            /usr/local/lib/android* /usr/local/lib/node_modules* /usr/local/share/chromium* /usr/local/share/powershell* /usr/local/share/vcpkg/ports/azure* \
-            /usr/local/share/vcpkg/ports/google* /usr/local/share/vcpkg/ports/libpq/android* /usr/local/share/vcpkg/ports/llvm* /usr/local/share/vcpkg/ports/mysql* \
-            /usr/local/share/vcpkg/ports/snap* /usr/share/azure* /usr/share/dotnet* /usr/share/glade* /usr/share/miniconda* /usr/share/php* /usr/share/swift \
-            /var/lib/mysql* /var/log/azure*"
-          testing: false
-
-      - name: Initialization Environment
-        env:
-          DEBIAN_FRONTEND: noninteractive
-        run: |
-          docker rmi $(docker images -q)
-          sudo -E apt -yqq update
-          sudo -E apt -yqq full-upgrade
-          sudo -E apt -yqq install $(sed -n "1{s/\r$//g;p;q}" $GITHUB_WORKSPACE/Scripts/Depends_TC.txt)
-          sudo -E apt -yqq autoremove --purge
-          sudo -E apt -yqq autoclean
-          sudo -E apt -yqq clean
-          sudo -E systemctl daemon-reload
-          sudo -E timedatectl set-timezone "Asia/Shanghai"
-
-      - name: Initialization Values
-        run: |
-          export WRT_DATE=$(TZ=UTC-8 date +"%y.%m.%d_%H.%M.%S")
-          export WRT_REPO=$(basename $GITHUB_WORKSPACE)
-          export WRT_SOURCE=$(echo $WRT_URL | cut -d '/' -f 5-)
-          export WRT_TYPE=$(sed -n "1{s/^#//;s/\r$//;p;q}" $GITHUB_WORKSPACE/Config/$WRT_TARGET.txt)
-
-          echo "WRT_DATE=$WRT_DATE" >> $GITHUB_ENV
-          echo "WRT_REPO=$WRT_REPO" >> $GITHUB_ENV
-          echo "WRT_SOURCE=$WRT_SOURCE" >> $GITHUB_ENV
-          echo "WRT_TYPE=$WRT_TYPE" >> $GITHUB_ENV
-
-      - name: Clone Code
-        run: |
-          git clone --depth=1 --single-branch --branch $WRT_BRANCH $WRT_URL ./wrt/
-
-          cd ./wrt/ && echo "WRT_HASH=$(git log -1 --pretty=format:'%h')" >> $GITHUB_ENV
-
-      - name: Check Scripts
-        run: |
-          find ./ -maxdepth 2 -type f -iregex ".*\(txt\|sh\)$" -exec dos2unix {} \; -exec chmod +x {} \;
-
-      - name: Check Caches
-        if: env.WRT_CFG == 'false'
-        id: check-cache
-        uses: actions/cache@main
-        with:
-          key: ${{env.WRT_TARGET}}-${{env.WRT_SOURCE}}-${{env.WRT_HASH}}
-          path: |
-            ./wrt/.ccache
-            ./wrt/staging_dir/host*
-            ./wrt/staging_dir/tool*
-
-      - name: Update Caches
-        if: env.WRT_CFG == 'false'
-        run: |
-          if ${{steps.check-cache.outputs.cache-hit == 'true'}}; then
-            sed -i 's/ $(tool.*\/stamp-compile)//g' ./wrt/Makefile
-            sed -i 's/ $(tool.*\/stamp-install)//g' ./wrt/Makefile
-
-            echo "toolchain skiped done!"
-          else
-            gh extension install actions/gh-actions-cache
-
-            CACHE_LIST=$(gh actions-cache list --key "$WRT_TARGET-$WRT_SOURCE" | cut -f 1)
-            for CACHE_KEY in $CACHE_LIST; do
-               gh actions-cache delete $CACHE_KEY --confirm
-            done
-
-            echo "caches cleanup done!"
-          fi
-
-      - name: Update Feeds
-        run: |
-          cd ./wrt/
-
-          ./scripts/feeds update -a
-          ./scripts/feeds install -a
-
-      - name: Custom Packages
-        run: |
-          cd ./wrt/package/
-          $GITHUB_WORKSPACE/Scripts/Plugins.sh
-
-      - name: Custom Settings
-        run: |
-          cd ./wrt/
-
-          rm -rf ./tmp* ./.config*
-
-          cat $GITHUB_WORKSPACE/Config/$WRT_TARGET.txt $GITHUB_WORKSPACE/Config/General.txt >> .config
-
-          $GITHUB_WORKSPACE/Scripts/Settings.sh
-
-          make defconfig
-
-      - name: Download Packages
-        if: env.WRT_CFG == 'false'
-        run: |
-          cd ./wrt/
-
-          make download -j$(nproc)
-
-      - name: Compile Firmware
-        if: env.WRT_CFG == 'false'
-        run: |
-          cd ./wrt/
-
-          make -j$(nproc) || make -j1 V=s
-
-      - name: Machine Information
-        run: |
-          cd ./wrt/
-
-          echo "======================="
-          lscpu | egrep "name|Core|Thread"
-          echo "======================="
-          df -h
-          echo "======================="
-          du -h --max-depth=1
-          echo "======================="
-
-      - name: Package Firmware
-        run: |
-          cd ./wrt/ && mkdir ./upload/
-
-          cp -rf ./.config ./upload/Config_"$WRT_TARGET"_"$WRT_SOURCE"_"$WRT_DATE".txt
-
-          if [[ $WRT_CFG == 'false' ]]; then
-            rm -rf $(find ./bin/targets/ -iregex ".*\(buildinfo\|json\|manifest\|sha256sums\|packages\)$")
-
-            for TYPE in $WRT_TYPE ; do
-              for FILE in $(find ./bin/targets/ -type f -iname "*$TYPE*.*") ; do
-                EXT=$(basename $FILE | cut -d '.' -f 2-)
-                NAME=$(basename $FILE | cut -d '.' -f 1 | grep -io "\($TYPE\).*")
-                NEW_FILE="$WRT_SOURCE"_"$NAME"_"$WRT_DATE"."$EXT"
-                mv -f $FILE ./upload/$NEW_FILE
-              done
-            done
-          fi
-
-      - name: Release Firmware
-        uses: softprops/action-gh-release@master
-        with:
-          tag_name: ${{env.WRT_TARGET}}_${{env.WRT_SOURCE}}_${{env.WRT_DATE}}
-          files: ./wrt/upload/*.*
-          body: |
-           这是测试固件
- 
-            源码：${{env.WRT_SOURCE}}
-            平台：${{env.WRT_TARGET}}
-            设备：${{env.WRT_TYPE}}
-            密码：${{env.WRT_PW}}
-            地址：${{env.WRT_IP}}
+    - name: Checkout
+      uses: actions/checkout@main
+    - name: 检查服务器配置
+      run: |
+        echo "已知CPU型号（降序）：7763,8370C,8272CL,8171M,E5系列"
+        echo "--------------------------CPU信息--------------------------"
+        echo "CPU物理数量:$(cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l)"
+        echo -e "CPU核心及版本信息：$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c) \n"
+        echo "--------------------------硬盘信息--------------------------"
+        echo -e "$(df -hT)"
+    - name: 清理系统
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: true
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: true
+    - name: 搭建编译环境
+      env:
+        DEBIAN_FRONTEND: noninteractive
+      run: |
+        sudo apt-get update
+        sudo -E apt-get -y full-upgrade
+        sudo -E apt-get -y install $(cat scripts/apt)
+        sudo -E systemctl daemon-reload
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
+        sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
+        sudo apt-get install -y gcc-13
+        sudo apt-get install -y g++-13
+        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 60 --slave /usr/bin/g++ g++ /usr/bin/g++-13
+        sudo -E apt-get -y autoremove --purge
+        sudo -E apt-get clean
+        sudo -E timedatectl set-timezone "Asia/Shanghai"
+    - name: 拉取源码及配置
+      run: |
+        git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+        wget --no-check-certificate https://ac.ch89.cn/diy.sh https://ac.ch89.cn/${{ env.FIRENAME }}.config
+        chmod +x diy.sh ${{ env.FIRENAME }}.config
+    - name: 缓存
+      id: cache
+      uses: stupidloud/cachewrtbuild@main
+      with:
+        skip_saving: 'true'
+        ccache: 'true'
+        mixkey: '${{ env.FIRENAME1 }}'
+        prefix: '${{ github.workspace }}/openwrt'
+    - name: 自定义配置
+      run: |
+        [ -e diy.sh ] && mv -f diy.sh openwrt
+        cd openwrt && . diy.sh
+    - name: 下载软件包
+      run: |
+        [ -e ${{ env.FIRENAME }}.config ] && mv -f ${{ env.FIRENAME }}.config openwrt/.config
+        cd openwrt
+        make defconfig
+        make download -j16
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+    - name: 编译
+      run: |
+        cd openwrt
+        echo -e "$(nproc) thread compile"
+        make -j$[`nproc`+1] || make -j1 V=s
+        echo "compile=success" >> $GITHUB_ENV
+    - name: 检查剩余空间
+      if: always()
+      run: | 
+        echo "--------------------------硬盘信息--------------------------"
+        echo -e "$(df -hT)"
+        rm -rf openwrt/build_dir openwrt/staging_dir openwrt/tmp openwrt/dl openwrt/package openwrt/feeds
+    - name: armv8打包镜像
+      if: env.compile == 'success' && env.FIRENAME1 == 'armv8'
+      uses: unifreq/openwrt_packit@master
+      env:
+        OPENWRT_ARMVIRT: openwrt/bin/targets/armvirt/64/*.tar.gz
+        KERNEL_VERSION_NAME: 5.15.2_6.1.2
+        OPENWRT_VER: R"$(date +%y.%m.%d)"
+        WHOAMI: Bin
+        DISTRIB_DESCRIPTION: OP
+    - name: 整理编译文件
+      if: env.compile == 'success'
+      run: |
+        if [ "$FIRENAME" = "jx64" ];then
+          rm -rf openwrt/bin/targets/x86/64/packages
+          echo "PACKAGED_OUTPUTPATH=openwrt/bin/targets/x86/64" >> $GITHUB_ENV
+        elif [ "$FIRENAME" = "lx64" ];then
+          bin1=openwrt/bin/targets/x86/64
+          mkdir -p bin2 && cp -r $bin1/* bin2
+          rm -rf $bin1/*.gz bin2/packages
+          tar -zcvf bin.tar.gz openwrt/bin
+          cp bin.tar.gz bin2
+          echo "PACKAGED_OUTPUTPATH=bin2" >> $GITHUB_ENV
+        elif [ "$FIRENAME" = "jarmv8" ];then
+          cp openwrt/bin/targets/armvirt/64/config.buildinfo ${{ env.PACKAGED_OUTPUTPATH }}
+        elif [ "$FIRENAME" = "larmv8" ];then
+          cp openwrt/bin/targets/armvirt/64/config.buildinfo ${{ env.PACKAGED_OUTPUTPATH }}
+          rm -rf openwrt/bin/targets/armvirt/64/*.tar.gz
+          tar -zcvf bin.tar.gz openwrt/bin
+          cp bin.tar.gz ${{ env.PACKAGED_OUTPUTPATH }}
+        fi
+    - name: 发布release
+      if: env.UPLOAD_RELEASE == 'true' && env.compile == 'success'
+      uses: ncipollo/release-action@main
+      with:
+        name: ${{ env.DATE }} 🚀 ${{ env.FIRENAME2 }} | 自动编译
+        allowUpdates: true
+        removeArtifacts: true
+        tag: ${{ env.FIRENAME3 }}
+        commit: master
+        token: ${{ secrets.RELEASES_TOKEN }}
+        body: |
+          ${{ env.Info }}
+        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
+    - name: 微信推送
+      if: always()
+      run: |
+        if [ "${{ env.compile }}" = "success" ];then
+          curl -H "Content-Type:application/json" -X POST -d '{"token":"${{ secrets.PUSHBOT }}","title":"${{ env.FIRENAME2 }}编译成功","content":"${{ env.FIRENAME2 }}编译成功B","template":"json"}' http://www.pushplus.plus/send
+        else 
+          curl -H "Content-Type:application/json" -X POST -d '{"token":"${{ secrets.PUSHBOT }}","title":"${{ env.FIRENAME2 }}编译失败","content":"${{ env.FIRENAME2 }}编译失败B","template":"json"}' http://www.pushplus.plus/send
+        fi
