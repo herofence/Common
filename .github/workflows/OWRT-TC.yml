@@ -47,15 +47,15 @@ jobs:
         run: |
           docker rmi $(docker images -q)
           sudo -E apt -yqq update
-          sudo -E apt -yqq purge $(sed -n "1{s/\r$//g;p;q}" $GITHUB_WORKSPACE/Depends.txt)
+          sudo -E apt -yqq purge $(sed -n "1{s/\r$//g;p;q}" $GITHUB_WORKSPACE/Depends_TC.txt)
           sudo -E apt -yqq full-upgrade
-          sudo -E apt -yqq install $(sed -n "2{s/\r$//g;p;q}" $GITHUB_WORKSPACE/Depends.txt)
+          sudo -E apt -yqq install $(sed -n "2{s/\r$//g;p;q}" $GITHUB_WORKSPACE/Depends_TC.txt)
           sudo -E apt -yqq autoremove --purge
           sudo -E apt -yqq autoclean
           sudo -E apt -yqq clean
           sudo -E systemctl daemon-reload
           sudo -E timedatectl set-timezone "Asia/Shanghai"
-          sudo -E rm -rf $(sed -n "3{s/\r$//g;p;q}" $GITHUB_WORKSPACE/Depends.txt)
+          sudo -E rm -rf $(sed -n "3{s/\r$//g;p;q}" $GITHUB_WORKSPACE/Depends_TC.txt)
 
       - name: 初始化参数
         run: |
