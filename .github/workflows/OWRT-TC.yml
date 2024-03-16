@@ -211,8 +211,8 @@ jobs:
           tag_name: ${{env.WRT_TARGET}}_${{env.WRT_SOURCE}}_${{env.WRT_DATE}}
           files: ./wrt/upload/*.*
           body: |
-  这是测试固件
-
+           这是测试固件
+ 
             源码：${{env.WRT_SOURCE}}
             平台：${{env.WRT_TARGET}}
             设备：${{env.WRT_TYPE}}
