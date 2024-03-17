@@ -6,8 +6,8 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_FILE: configs/x86_64.config
-  DIY_SCRIPT: diy-script.sh
+  CONFIG_FILE: Configs/x86_64.config
+  DIY_SCRIPT: Scripts/diy-script.sh
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
   UPLOAD_BIN_DIR: false
@@ -108,9 +108,9 @@ jobs:
         chmod +x $DIY_SCRIPT
         cd $OPENWRT_PATH
         $GITHUB_WORKSPACE/$DIY_SCRIPT
-        $GITHUB_WORKSPACE/scripts/preset-clash-core.sh $CLASH_KERNEL
-        $GITHUB_WORKSPACE/scripts/preset-terminal-tools.sh
-        $GITHUB_WORKSPACE/scripts/preset-adguard-core.sh $CLASH_KERNEL
+        $GITHUB_WORKSPACE/Scripts/preset-clash-core.sh $CLASH_KERNEL
+        $GITHUB_WORKSPACE/Scripts/preset-terminal-tools.sh
+        $GITHUB_WORKSPACE/Scripts/preset-adguard-core.sh $CLASH_KERNEL
 
     - name: 下载配件包
       run: |
@@ -125,7 +125,7 @@ jobs:
       run: |
         cd $OPENWRT_PATH
         mkdir -p files/etc/uci-defaults
-        cp $GITHUB_WORKSPACE/scripts/init-settings.sh files/etc/uci-defaults/99-init-settings
+        cp $GITHUB_WORKSPACE/Scripts/init-settings.sh files/etc/uci-defaults/99-init-settings
         echo -e "$(nproc) thread compile"
         make -j$(nproc) || make -j1 || make -j1 V=s
         echo "status=success" >> $GITHUB_OUTPUT
