@@ -17,7 +17,6 @@ merge_package(){
 }
 
 # 下载额外软件
-git clone --depth=1 --single-branch https://github.com/gdy666/luci-app-lucky.git
 merge_package master https://github.com/WYC-2020/openwrt-packages luci-app-openclash luci-app-ddnsto ddnsto 
 merge_package main https://github.com/kenzok8/small-package lua-maxminddb
 merge_package main https://github.com/ophub/luci-app-amlogic luci-app-amlogic
@@ -50,12 +49,30 @@ sudo mkdir -p -m 777 /mnt/openwrt/build_dir && ln -sf /mnt/openwrt/build_dir bui
 useVersionInfo=$(git show -s --date=short --format="编译前的最后一次[➦主源码](https://github.com/coolsnowwolf/lede)更新记录:<br/>更新人: %an<br/>更新时间: %cd<br/>更新内容: %s<br/>哈希值: %H")
 echo "Info=$useVersionInfo" >> $GITHUB_ENV
 echo "DATE=$(date +%Y年%m月%d日%H时)" >> $GITHUB_ENV
-echo "FIRENAME1=x64" >> $GITHUB_ENV
+if [ "$FIRENAME" = "jx64" ];then
+  echo "FIRENAME2=x64精简版" >> $GITHUB_ENV
+  echo "FIRENAME3=5jx64" >> $GITHUB_ENV
+elif [ "$FIRENAME" = "lx64" ];then
+  echo "FIRENAME2=x64懒人版" >> $GITHUB_ENV
+  echo "FIRENAME3=3lx64" >> $GITHUB_ENV
+elif [ "$FIRENAME" = "jarmv8" ];then
+  echo "FIRENAME2=armv8精简版" >> $GITHUB_ENV
+  echo "FIRENAME3=4jarmv8" >> $GITHUB_ENV
+elif [ "$FIRENAME" = "larmv8" ];then
+  echo "FIRENAME2=armv8懒人版" >> $GITHUB_ENV
+  echo "FIRENAME3=2larmv8" >> $GITHUB_ENV
+fi
 
-# x86修改固件名显示内核
-sed -i 's/IMG_PREFIX:=/IMG_PREFIX:=k$(LINUX_VERSION)-/g' include/image.mk
-# x86使用6.6内核
-sed -i 's/KERNEL_PATCHVER:=6.1/KERNEL_PATCHVER:=6.6/g' target/linux/x86/Makefile
+if [ "$FIRENAME1" = "x64" ];then
+  # x86修改固件名显示内核
+  sed -i 's/IMG_PREFIX:=/IMG_PREFIX:=k$(LINUX_VERSION)-/g' include/image.mk
+  # x86使用6.6内核
+  sed -i 's/KERNEL_PATCHVER:=6.1/KERNEL_PATCHVER:=6.6/g' target/linux/x86/Makefile
+elif [ "$FIRENAME1" = "armv8" ];then
+  # 修改amlogic更新库
+  sed -i "/amlogic_firmware_repo/ { s|https://github.com/breakings/OpenWrt|https://github.com/binge8/op|g }" package/openwrt-packages/luci-app-amlogic/root/etc/config/amlogic
+  sed -i "s|ARMv8|4jarmv8|g" package/openwrt-packages/luci-app-amlogic/root/etc/config/amlogic
+fi
 
 # 首页显示编译时间
 sed -i 's/OpenWrt/Bin AutoBuild '"$(date +%y.%m.%d)"' @ OpenWrt/g' package/lean/default-settings/files/zzz-default-settings
@@ -64,7 +81,7 @@ sed -i 's/OpenWrt/Bin AutoBuild '"$(date +%y.%m.%d)"' @ OpenWrt/g' package/lean/
 sed -i 's/bootstrap/ifit/g' feeds/luci/collections/luci/Makefile
 
 # 修改默认IP
-sed -i 's/192.168.1.1/192.168.2.1/g' package/base-files/files/bin/config_generate
+sed -i 's/192.168.1.1/192.168.7.1/g' package/base-files/files/bin/config_generate
 
 # 修改主机名
 sed -i 's/OpenWrt/Bin-Lean/g' package/base-files/files/bin/config_generate
@@ -85,7 +102,7 @@ sed -i 's/\bvpn\b/services/g' feeds/luci/applications/luci-app-zerotier/luasrc/v
 sed -i "s#h=\${g}' - '#h=#g" package/lean/autocore/files/x86/autocore
 
 # 固件更新地址
-sed -i '/CPU usage/a\                <tr><td width="33%"><%:Compile update%></td><td><a target="_blank" href="https://github.com/herofence/Common/releases">👆查看</a></td></tr>'  package/lean/autocore/files/x86/index.htm
+sed -i '/CPU usage/a\                <tr><td width="33%"><%:Compile update%></td><td><a target="_blank" href="https://github.com/binge8/op/releases">👆查看</a></td></tr>'  package/lean/autocore/files/x86/index.htm
 cat >>feeds/luci/modules/luci-base/po/zh-cn/base.po<<- EOF
 
 msgid "Compile update"
