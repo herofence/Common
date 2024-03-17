@@ -1,128 +1,165 @@
-# 公用编译核心
-name: OWET-TC
+#云编译公用核心
+name: OWRT-CORE
 
 on:
+  #公用核心标识
   workflow_call:
     inputs:
-      FIRENAME:
+      OWRT_TARGET:
         required: true
         type: string
-      FIRENAME1:
+      OWRT_THEME:
         required: true
         type: string
-      REPO_URL:
+      OWRT_NAME:
         required: true
         type: string
-      REPO_BRANCH:
+      OWRT_URL:
         required: true
         type: string
-      UPLOAD_RELEASE:
+      OWRT_PW:
+        required: true
+        type: string
+      OWRT_IP:
         required: true
         type: string
 
 env:
-  FIRENAME: ${{inputs.FIRENAME}}
-  FIRENAME1: ${{inputs.FIRENAME1}}
-  REPO_URL: ${{inputs.REPO_URL}}
-  REPO_BRANCH: ${{inputs.REPO_BRANCH}}
-  UPLOAD_RELEASE: ${{inputs.UPLOAD_RELEASE}}
+  GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
+  OWRT_TARGET: ${{inputs.OWRT_TARGET}}
+  OWRT_THEME: ${{inputs.OWRT_THEME}}
+  OWRT_NAME: ${{inputs.OWRT_NAME}}
+  OWRT_URL: ${{inputs.OWRT_URL}}
+  OWRT_PW: ${{inputs.OWRT_PW}}
+  OWRT_IP: ${{inputs.OWRT_IP}}
 
 jobs:
-  builds:
-    runs-on: ubuntu-22.04
+  owrt_core:
+    runs-on: ubuntu-latest
     steps:
-    - name: Checkout
-      uses: actions/checkout@main
-    - name: 检查服务器配置
-      run: |
-        echo "已知CPU型号（降序）：7763,8370C,8272CL,8171M,E5系列"
-        echo "--------------------------CPU信息--------------------------"
-        echo "CPU物理数量:$(cat /proc/cpuinfo| grep "physical id"| sort| uniq| wc -l)"
-        echo -e "CPU核心及版本信息：$(cat /proc/cpuinfo | grep name | cut -f2 -d: | uniq -c) \n"
-        echo "--------------------------硬盘信息--------------------------"
-        echo -e "$(df -hT)"
-    - name: 清理系统
-      uses: jlumbroso/free-disk-space@main
-      with:
-        tool-cache: true
-        android: true
-        dotnet: true
-        haskell: true
-        large-packages: true
-        docker-images: true
-        swap-storage: true
-    - name: 搭建编译环境
-      env:
-        DEBIAN_FRONTEND: noninteractive
-      run: |
-        sudo apt-get update
-        sudo -E apt-get -y full-upgrade
-        sudo -E apt-get -y install $(cat scripts/apt)
-        sudo -E systemctl daemon-reload
-        sudo add-apt-repository ppa:ubuntu-toolchain-r/test
-        sudo add-apt-repository ppa:ubuntu-toolchain-r/ppa
-        sudo apt-get install -y gcc-13
-        sudo apt-get install -y g++-13
-        sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-13 60 --slave /usr/bin/g++ g++ /usr/bin/g++-13
-        sudo -E apt-get -y autoremove --purge
-        sudo -E apt-get clean
-        sudo -E timedatectl set-timezone "Asia/Shanghai"
-    - name: 拉取源码及配置
-      run: |
-        git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-        wget --no-check-certificate https://github.com/herofence/Common/blob/main/Scripts/diy.sh https://github.com/herofence/Common/blob/main/Scripts/${{ env.FIRENAME1 }}.config
-        chmod +x diy.sh ${{ env.FIRENAME1 }}.config
-    - name: 缓存
-      id: cache
-      uses: stupidloud/cachewrtbuild@main
-      with:
-        skip_saving: 'true'
-        ccache: 'true'
-        mixkey: '${{ env.FIRENAME1 }}'
-        prefix: '${{ github.workspace }}/openwrt'
-    - name: 自定义配置
-      run: |
-        [ -e diy.sh ] && mv -f diy.sh openwrt
-        cd openwrt && . diy.sh
-    - name: 下载软件包
-      run: |
-        [ -e ${{ env.FIRENAME1 }}.config ] && mv -f ${{ env.FIRENAME1 }}.config openwrt/.config
-        cd openwrt
-        make defconfig
-        make download -j16
-        find dl -size -1024c -exec ls -l {} \;
-        find dl -size -1024c -exec rm -f {} \;
-    - name: 编译
-      run: |
-        cd openwrt
-        echo -e "$(nproc) thread compile"
-        make -j$[`nproc`+1] || make -j1 V=s
-        echo "compile=success" >> $GITHUB_ENV
-    - name: 检查剩余空间
-      if: always()
-      run: | 
-        echo "--------------------------硬盘信息--------------------------"
-        echo -e "$(df -hT)"
-        rm -rf openwrt/build_dir openwrt/staging_dir openwrt/tmp openwrt/dl openwrt/package openwrt/feeds
-    - name: 整理编译文件
-      run: |
-          bin1=openwrt/bin/targets/x86/64
-          mkdir -p bin2 && cp -r $bin1/* bin2
-          rm -rf $bin1/*.gz bin2/packages
-          tar -zcvf bin.tar.gz openwrt/bin
-          cp bin.tar.gz bin2
-          echo "PACKAGED_OUTPUTPATH=bin2" >> $GITHUB_ENV
-          
-    - name: 发布release
-      if: env.UPLOAD_RELEASE == 'true' && env.compile == 'success'
-      uses: softprops/action-gh-release@master
-      with:
-        name: ${{ env.DATE }} 🚀 ${{ env.FIRENAME1 }} | 自动编译
-        allowUpdates: true
-        removeArtifacts: true
-        tag: ${{ env.FIRENAME1 }}
-        commit: master
-        token: ${{ secrets.RELEASES_TOKEN }}
-        body: |
-          ${{ env.Info }}
-        artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
+      - name: 检查项目
+        uses: actions/checkout@main
+
+      - name: 初始化环境
+        env:
+          DEBIAN_FRONTEND: noninteractive
+        run: |
+          docker rmi $(docker images -q)
+          sudo -E apt -yqq update
+          sudo -E apt -yqq purge $(sed -n "1{s/\r$//g;p;q}" $GITHUB_WORKSPACE/Depends.txt)
+          sudo -E apt -yqq full-upgrade
+          sudo -E apt -yqq install $(sed -n "2{s/\r$//g;p;q}" $GITHUB_WORKSPACE/Depends.txt)
+          sudo -E apt -yqq autoremove --purge
+          sudo -E apt -yqq autoclean
+          sudo -E apt -yqq clean
+          sudo -E systemctl daemon-reload
+          sudo -E timedatectl set-timezone "Asia/Shanghai"
+          sudo -E rm -rf $(sed -n "3{s/\r$//g;p;q}" $GITHUB_WORKSPACE/Depends.txt)
+
+      - name: 初始化参数
+        run: |
+          export OWRT_DATE=$(TZ=UTC-8 date +"%y.%m.%d_%H.%M.%S")
+          export OWRT_SOURCE=$(echo $OWRT_URL | cut -d '/' -f 5-)
+          export OWRT_TYPE=$(sed -n "1{s/^#//;s/\r$//;p;q}" $GITHUB_WORKSPACE/Config/$OWRT_TARGET.txt)
+
+          echo "OWRT_SOURCE=$OWRT_SOURCE" >> $GITHUB_ENV
+          echo "OWRT_TARGET=$OWRT_TARGET" >> $GITHUB_ENV
+          echo "OWRT_DATE=$OWRT_DATE" >> $GITHUB_ENV
+          echo "OWRT_TYPE=$OWRT_TYPE" >> $GITHUB_ENV
+          echo "OWRT_PW=$OWRT_PW" >> $GITHUB_ENV
+          echo "OWRT_IP=$OWRT_IP" >> $GITHUB_ENV
+
+      - name: 检查文件
+        run: |
+          dos2unix $(find ./ -maxdepth 2 -type f -iregex ".*\(txt\|sh\)$")
+          chmod +x $(find ./ -maxdepth 2 -type f -iname "*.sh")
+
+      - name: 复制仓库
+        run: |
+          git clone --depth=1 --single-branch $OWRT_URL ./owrt
+
+      - name: 更新源代码
+        run: |
+          cd ./owrt
+          ./scripts/feeds update -a
+          ./scripts/feeds install -a
+
+      - name: 自定义软件库
+        run: |
+          cd ./owrt
+          $GITHUB_WORKSPACE/Scripts/diy.sh
+          cd ./package
+          $GITHUB_WORKSPACE/Scripts/Plugins.sh
+
+      - name: 生成配置文件
+        run: |
+          cd ./owrt
+
+          rm -rf ./tmp* ./.config*
+          cat $GITHUB_WORKSPACE/Config/$OWRT_TARGET.txt $GITHUB_WORKSPACE/Config/General.txt >> .config
+
+          $GITHUB_WORKSPACE/Scripts/Extras.sh
+
+          make defconfig
+
+      - name: 清理工具
+        run: |
+          cd ./owrt
+
+          make dirclean
+
+      - name: 下载软件包
+        run: |
+          cd ./owrt
+
+          make download -j$(nproc)
+
+      - name: 编译固件
+        run: |
+          cd ./owrt
+
+          make -j$(nproc) || make -j1 V=s
+
+          echo "======================="
+          df -h
+          echo "======================="
+          du -h --max-depth=1
+          echo "======================="
+
+      - name: 导出配置文件
+        run: |
+          cd ./owrt && mkdir ./upload
+
+          rm -rf $(find ./bin/targets/ -iregex ".*\(json\|manifest\|buildinfo\|sha256sums\|packages\)$")
+          cp -rf $(find ./bin/targets/ -type f -iname "*.*") ./upload/
+          cp -rf ./.config ./upload/Config_"$OWRT_TARGET"_"$OWRT_SOURCE"_"$OWRT_DATE".txt
+
+          cd ./upload
+
+          $GITHUB_WORKSPACE/Scripts/Renames.sh
+
+      - name: 固件打包
+        uses: softprops/action-gh-release@master
+        with:
+          tag_name: ${{env.OWRT_TARGET}}_${{env.OWRT_SOURCE}}_${{env.OWRT_DATE}}
+          files: ./owrt/upload/*.*
+          body: |
+            包含passwall、IPV6、打印机驱动
+
+            源码：${{env.OWRT_SOURCE}}
+            平台：${{env.OWRT_TARGET}}
+            设备：${{env.OWRT_TYPE}}
+            密码：${{env.OWRT_PW}}
+            地址：${{env.OWRT_IP}}
+
+      - name: 删除旧版本
+        uses: dev-drprasad/delete-older-releases@master
+        with:
+          keep_latest: 10
+          delete_tags: true
+
+      - name: 删除旧工作流
+        uses: Mattraks/delete-workflow-runs@main
+        with:
+          retain_days: 0
+          keep_minimum_runs: 1
