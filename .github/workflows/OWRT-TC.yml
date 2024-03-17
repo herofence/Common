@@ -104,16 +104,7 @@ jobs:
         echo "--------------------------硬盘信息--------------------------"
         echo -e "$(df -hT)"
         rm -rf openwrt/build_dir openwrt/staging_dir openwrt/tmp openwrt/dl openwrt/package openwrt/feeds
-    - name: armv8打包镜像
-      if: env.compile == 'success' && env.FIRENAME1 == 'armv8'
-      uses: unifreq/openwrt_packit@master
-      env:
-        OPENWRT_ARMVIRT: openwrt/bin/targets/armvirt/64/*.tar.gz
-        KERNEL_VERSION_NAME: 5.15.2_6.1.2
-        OPENWRT_VER: R"$(date +%y.%m.%d)"
-        WHOAMI: Bin
-        DISTRIB_DESCRIPTION: OP
-    - name: 整理编译文件
+       - name: 整理编译文件
       if: env.compile == 'success'
       run: |
           bin1=openwrt/bin/targets/x86/64
