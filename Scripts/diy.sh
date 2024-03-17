@@ -32,7 +32,6 @@ git clone --depth=1 -b master https://github.com/openwrt-develop/luci-theme-atma
 git clone --depth=1 -b master https://github.com/rufengsuixing/luci-app-adguardhome package/openwrt-packages/luci-app-adguardhome
 git clone --depth=1 -b master https://github.com/931122/luci-app-pushbot package/openwrt-packages/luci-app-pushbot
 git clone --depth=1 -b main https://github.com/sirpdboy/luci-theme-kucat package/openwrt-packages/luci-theme-kucat
-git clone --depth=1 -b main https://github.com/gdy666/luci-app-lucky.git
 # 删除重复软件包
 rm -rf feeds/luci/applications/luci-app-dockerman feeds/luci/applications/luci-app-pushbot feeds/packages/net/mosdns
 
@@ -82,7 +81,7 @@ sed -i 's/OpenWrt/Bin AutoBuild '"$(date +%y.%m.%d)"' @ OpenWrt/g' package/lean/
 sed -i 's/bootstrap/ifit/g' feeds/luci/collections/luci/Makefile
 
 # 修改默认IP
-sed -i 's/192.168.1.1/192.168.2.1/g' package/base-files/files/bin/config_generate
+sed -i 's/192.168.1.1/192.168.7.1/g' package/base-files/files/bin/config_generate
 
 # 修改主机名
 sed -i 's/OpenWrt/Bin-Lean/g' package/base-files/files/bin/config_generate
