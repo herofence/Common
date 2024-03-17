@@ -71,7 +71,7 @@ if [ "$FIRENAME1" = "x64" ];then
   sed -i 's/KERNEL_PATCHVER:=6.1/KERNEL_PATCHVER:=6.6/g' target/linux/x86/Makefile
 elif [ "$FIRENAME1" = "armv8" ];then
   # 修改amlogic更新库
-  sed -i "/amlogic_firmware_repo/ { s|https://github.com/breakings/OpenWrt|https://github.com/binge8/op|g }" package/openwrt-packages/luci-app-amlogic/root/etc/config/amlogic
+  sed -i "/amlogic_firmware_repo/ { s|https://github.com/breakings/OpenWrt|https://github.com/herofence/Common|g }" package/openwrt-packages/luci-app-amlogic/root/etc/config/amlogic
   sed -i "s|ARMv8|4jarmv8|g" package/openwrt-packages/luci-app-amlogic/root/etc/config/amlogic
 fi
 
