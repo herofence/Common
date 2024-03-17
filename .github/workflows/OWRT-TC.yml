@@ -121,7 +121,7 @@ jobs:
         name: ${{ env.DATE }} 🚀 ${{ env.FIRENAME1 }} | 自动编译
         allowUpdates: true
         removeArtifacts: true
-        tag: ${{ env.FIRENAME3 }}
+        tag: ${{ env.FIRENAME1 }}
         commit: master
         token: ${{ secrets.RELEASES_TOKEN }}
         body: |
