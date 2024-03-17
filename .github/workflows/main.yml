@@ -70,7 +70,7 @@ jobs:
     - name: 拉取源码及配置
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-        wget --no-check-certificate https://ac.ch89.cn/diy.sh https://ac.ch89.cn/${{ env.FIRENAME }}.config
+        wget --no-check-certificate https://github.com/herofence/Common/tree/main/Scripts/diy.sh https://github.com/herofence/Common/tree/main/Scripts/${{ env.FIRENAME }}.config
         chmod +x diy.sh ${{ env.FIRENAME }}.config
     - name: 缓存
       id: cache
