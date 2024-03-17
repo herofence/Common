@@ -84,6 +84,10 @@ sed -i 's/\bvpn\b/services/g' feeds/luci/applications/luci-app-zerotier/luasrc/v
 # x86显示CPU型号
 sed -i "s#h=\${g}' - '#h=#g" package/lean/autocore/files/x86/autocore
 
+# 固件更新地址
+sed -i '/CPU usage/a\                <tr><td width="33%"><%:Compile update%></td><td><a target="_blank" href="https://github.com/herofence/Common/releases">👆查看</a></td></tr>'  package/lean/autocore/files/x86/index.htm
+cat >>feeds/luci/modules/luci-base/po/zh-cn/base.po<<- EOF
+
 msgid "Compile update"
 msgstr "固件地址"
 EOF
