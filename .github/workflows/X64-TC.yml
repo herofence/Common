@@ -8,7 +8,7 @@ on:
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
   REPO_BRANCH: master
-  CONFIG_FILE: config/x86_64.config
+  CONFIG_FILE: Config/x86_64.config
   DIY_SCRIPT: Scripts/diy-script.sh
   CLASH_KERNEL: amd64
   CACHE_TOOLCHAIN: true
