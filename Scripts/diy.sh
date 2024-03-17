@@ -17,7 +17,6 @@ merge_package(){
 }
 
 # 下载额外软件
-merge_package main https://github.com/gdy666/luci-app-lucky.git
 merge_package master https://github.com/WYC-2020/openwrt-packages luci-app-openclash luci-app-ddnsto ddnsto 
 merge_package main https://github.com/kenzok8/small-package lua-maxminddb
 merge_package main https://github.com/ophub/luci-app-amlogic luci-app-amlogic
