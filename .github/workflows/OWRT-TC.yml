@@ -104,7 +104,7 @@ jobs:
         echo "--------------------------硬盘信息--------------------------"
         echo -e "$(df -hT)"
         rm -rf openwrt/build_dir openwrt/staging_dir openwrt/tmp openwrt/dl openwrt/package openwrt/feeds
-       - name: 整理编译文件
+    - name: 整理编译文件
       if: env.compile == 'success'
       run: |
           bin1=openwrt/bin/targets/x86/64
