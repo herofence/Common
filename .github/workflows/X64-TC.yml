@@ -13,7 +13,7 @@ permissions: write-all
 jobs:
   build:
     #调用公用编译核心OWRT-TC.yml
-    uses: ./.github/workflows/main.yml
+    uses: ./.github/workflows/OWRT-TC.yml
     secrets: inherit
     with:
       FIRENAME: lx64
