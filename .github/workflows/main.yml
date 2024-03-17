@@ -74,6 +74,7 @@ jobs:
         $GITHUB_WORKSPACE/Scripts/diy.sh
         $GITHUB_WORKSPACE/Scripts/${{ env.FIRENAME }}.config
         chmod +x $(find ./ -maxdepth 2 -type f -iname "*.sh")
+        chmod +x $(find ./ -maxdepth 2 -type f -iname "*.config")
         chmod +x diy.sh ${{ env.FIRENAME }}.config
     - name: 缓存
       id: cache
