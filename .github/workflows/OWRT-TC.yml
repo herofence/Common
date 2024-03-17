@@ -71,7 +71,7 @@ jobs:
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
         wget --no-check-certificate https://github.com/herofence/Common/blob/main/Scripts/diy.sh https://github.com/herofence/Common/blob/main/Config/General_TC.txt
-        chmod +x diy.sh ${{ env.FIRENAME }}.config
+        chmod +x diy.sh General_TC.txt
     - name: 缓存
       id: cache
       uses: stupidloud/cachewrtbuild@main
