@@ -2,7 +2,6 @@ name: X86_64 测试
 
 on:
   workflow_dispatch:
-  schedule:
 
 env:
   REPO_URL: https://github.com/coolsnowwolf/lede
