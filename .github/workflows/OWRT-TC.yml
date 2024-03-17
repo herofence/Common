@@ -70,8 +70,8 @@ jobs:
     - name: 拉取源码及配置
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
-        wget --no-check-certificate https://github.com/herofence/Common/blob/main/Scripts/diy.sh https://github.com/herofence/Common/blob/main/Scripts/${{ env.FIRENAME }}.config
-        chmod +x diy.sh diy.config
+        wget --no-check-certificate https://github.com/herofence/Common/blob/main/Scripts/diy.sh https://github.com/herofence/Common/blob/main/Scripts/${{ env.FIRENAME1 }}.config
+        chmod +x diy.sh ${{ env.FIRENAME1 }}.config
     - name: 缓存
       id: cache
       uses: stupidloud/cachewrtbuild@main
@@ -86,7 +86,7 @@ jobs:
         cd openwrt && . diy.sh
     - name: 下载软件包
       run: |
-        [ -e ${{ env.FIRENAME }}.config ] && mv -f ${{ env.FIRENAME }}.config openwrt/.config
+        [ -e ${{ env.FIRENAME1 }}.config ] && mv -f ${{ env.FIRENAME1 }}.config openwrt/.config
         cd openwrt
         make defconfig
         make download -j16
@@ -116,23 +116,12 @@ jobs:
     - name: 整理编译文件
       if: env.compile == 'success'
       run: |
-        if [ "$FIRENAME" = "jx64" ];then
-          rm -rf openwrt/bin/targets/x86/64/packages
-          echo "PACKAGED_OUTPUTPATH=openwrt/bin/targets/x86/64" >> $GITHUB_ENV
-        elif [ "$FIRENAME" = "lx64" ];then
           bin1=openwrt/bin/targets/x86/64
           mkdir -p bin2 && cp -r $bin1/* bin2
           rm -rf $bin1/*.gz bin2/packages
           tar -zcvf bin.tar.gz openwrt/bin
           cp bin.tar.gz bin2
           echo "PACKAGED_OUTPUTPATH=bin2" >> $GITHUB_ENV
-        elif [ "$FIRENAME" = "jarmv8" ];then
-          cp openwrt/bin/targets/armvirt/64/config.buildinfo ${{ env.PACKAGED_OUTPUTPATH }}
-        elif [ "$FIRENAME" = "larmv8" ];then
-          cp openwrt/bin/targets/armvirt/64/config.buildinfo ${{ env.PACKAGED_OUTPUTPATH }}
-          rm -rf openwrt/bin/targets/armvirt/64/*.tar.gz
-          tar -zcvf bin.tar.gz openwrt/bin
-          cp bin.tar.gz ${{ env.PACKAGED_OUTPUTPATH }}
         fi
     - name: 发布release
       if: env.UPLOAD_RELEASE == 'true' && env.compile == 'success'
@@ -147,11 +136,3 @@ jobs:
         body: |
           ${{ env.Info }}
         artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
-    - name: 微信推送
-      if: always()
-      run: |
-        if [ "${{ env.compile }}" = "success" ];then
-          curl -H "Content-Type:application/json" -X POST -d '{"token":"${{ secrets.PUSHBOT }}","title":"${{ env.FIRENAME2 }}编译成功","content":"${{ env.FIRENAME2 }}编译成功B","template":"json"}' http://www.pushplus.plus/send
-        else 
-          curl -H "Content-Type:application/json" -X POST -d '{"token":"${{ secrets.PUSHBOT }}","title":"${{ env.FIRENAME2 }}编译失败","content":"${{ env.FIRENAME2 }}编译失败B","template":"json"}' http://www.pushplus.plus/send
-        fi
