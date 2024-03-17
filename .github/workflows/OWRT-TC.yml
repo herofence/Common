@@ -118,7 +118,7 @@ jobs:
       if: env.UPLOAD_RELEASE == 'true' && env.compile == 'success'
       uses: softprops/action-gh-release@master
       with:
-        name: ${{ env.DATE }} 🚀 ${{ env.FIRENAME2 }} | 自动编译
+        name: ${{ env.DATE }} 🚀 ${{ env.FIRENAME1 }} | 自动编译
         allowUpdates: true
         removeArtifacts: true
         tag: ${{ env.FIRENAME3 }}
