@@ -147,11 +147,4 @@ jobs:
         body: |
           ${{ env.Info }}
         artifacts: ${{ env.PACKAGED_OUTPUTPATH }}/*
-    - name: 微信推送
-      if: always()
-      run: |
-        if [ "${{ env.compile }}" = "success" ];then
-          curl -H "Content-Type:application/json" -X POST -d '{"token":"${{ secrets.PUSHBOT }}","title":"${{ env.FIRENAME2 }}编译成功","content":"${{ env.FIRENAME2 }}编译成功B","template":"json"}' http://www.pushplus.plus/send
-        else 
-          curl -H "Content-Type:application/json" -X POST -d '{"token":"${{ secrets.PUSHBOT }}","title":"${{ env.FIRENAME2 }}编译失败","content":"${{ env.FIRENAME2 }}编译失败B","template":"json"}' http://www.pushplus.plus/send
-        fi
+  
