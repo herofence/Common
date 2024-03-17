@@ -2,7 +2,7 @@ name: x64-TC
 
 on:
   repository_dispatch:
-    types: lx64
+    types: x64
   workflow_dispatch:
   #schedule:
   #  - cron: 00 16 * * *
