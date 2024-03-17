@@ -49,17 +49,17 @@ jobs:
         sudo -E apt-get -y clean
         sudo timedatectl set-timezone "$TZ"
 
-    - name: Combine Disks
+    - name: 硬盘设置
       uses: easimon/maximize-build-space@master
       with:
         swap-size-mb: 1024
         temp-reserve-mb: 100
         root-reserve-mb: 1024
 
-    - name: Checkout
+    - name: 检查
       uses: actions/checkout@main
 
-    - name: Clone Source Code
+    - name: 复制源代码
       run: |
         df -hT $GITHUB_WORKSPACE
         git clone $REPO_URL -b $REPO_BRANCH openwrt
