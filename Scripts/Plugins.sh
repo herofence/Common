@@ -15,7 +15,7 @@ git clone --depth=1 --single-branch --branch $(echo $OWRT_URL | grep -iq "lede" 
 #Pass Wall
 git clone --depth=1 --single-branch https://github.com/xiaorouji/openwrt-passwall.git
 git clone --depth=1 --single-branch https://github.com/xiaorouji/openwrt-passwall2 luci-app-passwall2
-#git clone --depth=1 --single-branch https://github.com/xiaorouji/openwrt-passwall-packages.git
+git clone --depth=1 --single-branch https://github.com/xiaorouji/openwrt-passwall-packages.git
 #luci-app-easymesh
 #git clone --depth=1 --single-branch https://github.com/ntlf9t/luci-app-easymesh.git
 #tailscale
