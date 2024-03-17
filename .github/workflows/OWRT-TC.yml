@@ -1,5 +1,5 @@
 # 公用编译核心
-name: main
+name: OWET-TC
 
 on:
   workflow_call:
