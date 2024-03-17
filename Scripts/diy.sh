@@ -50,30 +50,12 @@ sudo mkdir -p -m 777 /mnt/openwrt/build_dir && ln -sf /mnt/openwrt/build_dir bui
 useVersionInfo=$(git show -s --date=short --format="编译前的最后一次[➦主源码](https://github.com/coolsnowwolf/lede)更新记录:<br/>更新人: %an<br/>更新时间: %cd<br/>更新内容: %s<br/>哈希值: %H")
 echo "Info=$useVersionInfo" >> $GITHUB_ENV
 echo "DATE=$(date +%Y年%m月%d日%H时)" >> $GITHUB_ENV
-if [ "$FIRENAME" = "jx64" ];then
-  echo "FIRENAME2=x64精简版" >> $GITHUB_ENV
-  echo "FIRENAME3=5jx64" >> $GITHUB_ENV
-elif [ "$FIRENAME" = "lx64" ];then
-  echo "FIRENAME2=x64懒人版" >> $GITHUB_ENV
-  echo "FIRENAME3=3lx64" >> $GITHUB_ENV
-elif [ "$FIRENAME" = "jarmv8" ];then
-  echo "FIRENAME2=armv8精简版" >> $GITHUB_ENV
-  echo "FIRENAME3=4jarmv8" >> $GITHUB_ENV
-elif [ "$FIRENAME" = "larmv8" ];then
-  echo "FIRENAME2=armv8懒人版" >> $GITHUB_ENV
-  echo "FIRENAME3=2larmv8" >> $GITHUB_ENV
-fi
+echo "FIRENAME1=x64" >> $GITHUB_ENV
 
-if [ "$FIRENAME1" = "x64" ];then
-  # x86修改固件名显示内核
-  sed -i 's/IMG_PREFIX:=/IMG_PREFIX:=k$(LINUX_VERSION)-/g' include/image.mk
-  # x86使用6.6内核
-  sed -i 's/KERNEL_PATCHVER:=6.1/KERNEL_PATCHVER:=6.6/g' target/linux/x86/Makefile
-elif [ "$FIRENAME1" = "armv8" ];then
-  # 修改amlogic更新库
-  sed -i "/amlogic_firmware_repo/ { s|https://github.com/breakings/OpenWrt|https://github.com/binge8/op|g }" package/openwrt-packages/luci-app-amlogic/root/etc/config/amlogic
-  sed -i "s|ARMv8|4jarmv8|g" package/openwrt-packages/luci-app-amlogic/root/etc/config/amlogic
-fi
+# x86修改固件名显示内核
+sed -i 's/IMG_PREFIX:=/IMG_PREFIX:=k$(LINUX_VERSION)-/g' include/image.mk
+# x86使用6.6内核
+sed -i 's/KERNEL_PATCHVER:=6.1/KERNEL_PATCHVER:=6.6/g' target/linux/x86/Makefile
 
 # 首页显示编译时间
 sed -i 's/OpenWrt/Bin AutoBuild '"$(date +%y.%m.%d)"' @ OpenWrt/g' package/lean/default-settings/files/zzz-default-settings
@@ -101,10 +83,6 @@ sed -i 's/\bvpn\b/services/g' feeds/luci/applications/luci-app-zerotier/luasrc/v
 
 # x86显示CPU型号
 sed -i "s#h=\${g}' - '#h=#g" package/lean/autocore/files/x86/autocore
-
-# 固件更新地址
-sed -i '/CPU usage/a\                <tr><td width="33%"><%:Compile update%></td><td><a target="_blank" href="https://github.com/binge8/op/releases">👆查看</a></td></tr>'  package/lean/autocore/files/x86/index.htm
-cat >>feeds/luci/modules/luci-base/po/zh-cn/base.po<<- EOF
 
 msgid "Compile update"
 msgstr "固件地址"
