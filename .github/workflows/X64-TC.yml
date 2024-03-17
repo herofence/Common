@@ -1,4 +1,4 @@
-name: x64懒人版
+name: x64测试
 
 on:
   repository_dispatch:
