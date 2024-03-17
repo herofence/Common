@@ -125,7 +125,7 @@ jobs:
         fi
     - name: 发布release
       if: env.UPLOAD_RELEASE == 'true' && env.compile == 'success'
-      uses: ncipollo/release-action@main
+      uses: softprops/action-gh-release@master
       with:
         name: ${{ env.DATE }} 🚀 ${{ env.FIRENAME2 }} | 自动编译
         allowUpdates: true
