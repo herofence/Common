@@ -164,7 +164,7 @@ jobs:
 
     - name: 发布固件
       if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE == 'true'
-      uses: softprops/action-gh-release@master
+      uses: ncipollo/release-action@v1
       with:
         name: R${{ env.DATE }} for ${{ env.FIRMWARE_TAG }}
         allowUpdates: true
