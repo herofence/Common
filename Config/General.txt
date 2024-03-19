@@ -19,6 +19,7 @@ CONFIG_PACKAGE_luci-app-diskman=y
 CONFIG_PACKAGE_luci-app-firewall=y
 #网络代理
 CONFIG_PACKAGE_luci-app-passwall=y
+CONFIG_PACKAGE_luci-app-ssr-plus=n
 CONFIG_PACKAGE_luci-app-openclash=n
 #UPNP重定向
 CONFIG_PACKAGE_luci-app-upnp=y
