@@ -47,6 +47,7 @@ jobs:
           docker rmi $(docker images -q)
           sudo -E apt -yqq update
           sudo -E apt -yqq purge $(sed -n "1{s/\r$//g;p;q}" $GITHUB_WORKSPACE/Depends.txt)
+          sudo -E apt -yqq full-upgrade
           sudo -E apt -yqq install $(sed -n "2{s/\r$//g;p;q}" $GITHUB_WORKSPACE/Depends.txt)
           sudo -E apt -yqq autoremove --purge
           sudo -E apt -yqq autoclean
@@ -156,6 +157,13 @@ jobs:
             地址：${{env.OWRT_IP}}
 
       - name: 删除旧版本
-        uses: dev-drprasad/delete-older-releases@v0.3.3
+        uses: dev-drprasad/delete-older-releases@master
         with:
           keep_latest: 10
+          delete_tags: true
+
+      - name: 删除旧工作流
+        uses: Mattraks/delete-workflow-runs@main
+        with:
+          retain_days: 0
+          keep_minimum_runs: 1
