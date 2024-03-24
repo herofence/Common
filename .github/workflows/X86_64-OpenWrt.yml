@@ -173,7 +173,7 @@ jobs:
         artifacts: ${{ env.FIRMWARE_PATH }}/*
         body: |
           包含openclash、IPV6、打印机驱动
-          **This is OpenWrt Firmware for ${{ env.FIRMWARE_TAG }}**
+ 
           ### 📒 固件信息
           - 💻 平台架构: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
           - ⚽ 固件源码: ${{ env.REPO_URL }}
