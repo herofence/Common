@@ -93,6 +93,8 @@ git clone --depth=1 https://github.com/linkease/nas-packages package/nas-package
 git clone --depth=1 https://github.com/linkease/nas-packages-luci package/nas-packages-luci
 #内网测速
 git clone https://github.com/sirpdboy/netspeedtest.git package/netspeedtest
+#访问控制
+git clone --depth=1 https://github.com/k-szuster/luci-access-control-package package/luci-app-access-control
 #其它
 git clone --depth=1 -b openwrt-18.06 https://github.com/tty228/luci-app-wechatpush package/luci-app-serverchan
 git clone --depth=1 https://github.com/ilxp/luci-app-ikoolproxy package/luci-app-ikoolproxy
