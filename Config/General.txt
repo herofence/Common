@@ -1,7 +1,10 @@
+# 平台设置
+CONFIG_TARGET_x86=y
+CONFIG_TARGET_x86_64=y
+CONFIG_TARGET_x86_64_DEVICE_generic=y
 # Set Firmware Size
 CONFIG_TARGET_KERNEL_PARTSIZE=16
 CONFIG_TARGET_ROOTFS_PARTSIZE=2048
-
 # Firmware Type
 # CONFIG_GRUB_CONSOLE is not set
 CONFIG_GRUB_IMAGES=y
@@ -11,66 +14,61 @@ CONFIG_TARGET_ROOTFS_EXT4FS=y
 CONFIG_TARGET_ROOTFS_SQUASHFS=y
 CONFIG_TARGET_ROOTFS_TARGZ=y
 # CONFIG_VMDK_IMAGES is not set
-
 # Ipv6支持
 CONFIG_PACKAGE_6in4=y
 CONFIG_PACKAGE_ipv6helper=y
 CONFIG_PACKAGE_ip6tables=y
 CONFIG_PACKAGE_ip6tables-extra=y
 CONFIG_PACKAGE_ip6tables-mod-nat=y
-
 # 磁盘管理
 CONFIG_PACKAGE_luci-app-diskman=y
-
 # VPN
 CONFIG_PACKAGE_luci-app-zerotier=y
-# CONFIG_PACKAGE_tailscale is not set
-
+# CONFIG_PACKAGE_luci-app-tailscale is not set
 #lucky
 CONFIG_PACKAGE_luci-app-lucky=y
-
 # 网络重定向
 CONFIG_PACKAGE_luci-app-upnp=y
-
 # USB打印服务器
 CONFIG_PACKAGE_autosamba=y
 CONFIG_PACKAGE_kmod-usb-printer=y
 CONFIG_PACKAGE_luci-app-usb-printer=y
-
 # 易有云
 CONFIG_PACKAGE_luci-app-quickstart=y
-
 #网络代理
 CONFIG_PACKAGE_luci-app-passwall=y
-
+# CONFIG_PACKAGE_luci-app-openclash is not set
 # 防火墙
 CONFIG_PACKAGE_luci-app-firewall=y
 CONFIG_PACKAGE_luci-app-arpbind=y
-
 # 主题
 CONFIG_PACKAGE_luci-theme-argon=y
+CONFIG_PACKAGE_luci-app-argon-config=y
 CONFIG_PACKAGE_luci-theme-opentomcat=y
-
+CONFIG_PACKAGE_luci-theme-openwrt=y
+CONFIG_PACKAGE_luci-theme-infinityfreedom-ng=y
 # 定时重启
 CONFIG_PACKAGE_luci-app-autoreboot=y
-
 # 内网设备唤醒
 CONFIG_PACKAGE_luci-app-wol=y
-
 #docker
 CONFIG_PACKAGE_luci-app-dockerman=y
-
 #搭建WEB服务器
 CONFIG_PACKAGE_luci-app-uhttpd=y
-
 #内网测速
 CONFIG_PACKAGE_luci-app-netspeedtest=y
-
+#应用过滤
+CONFIG_PACKAGE_luci-app-oaf=y
+CONFIG_PACKAGE_luci-i18n-oaf-zh-cn=y
+#上网时间控制
+# CONFIG_PACKAGE_luci-app-accesscontrol is not set
+#DDNS-GO
+# CONFIG_PACKAGE_luci-app-ddns-go is not set
+#访问控制
+# CONFIG_PACKAGE_luci-app-access-control is not set
 # 消息推送
 # CONFIG_PACKAGE_luci-app-pushbot is not set
 # CONFIG_GRUB_CONSOLE is not set
-# CONFIG_VMDK_IMAGES is not set
-# CONFIG_PACKAGE_luci-app-openclash is not set
 # CONFIG_PACKAGE_luci-app-frpc is not set
 # CONFIG_PACKAGE_luci-app-ipsec-vpnd is not set
 # CONFIG_PACKAGE_luci-app-mosdns is not set
@@ -87,11 +85,9 @@ CONFIG_PACKAGE_luci-app-netspeedtest=y
 # CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Shadowsocks_Rust_Server is not set
 # CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Trojan is not set
 # CONFIG_PACKAGE_luci-app-ssr-plus_INCLUDE_Tuic_Client is not set
-# CONFIG_PACKAGE_luci-app-accesscontrol is not set
 # CONFIG_PACKAGE_luci-app-adbyby-plus is not set
 # CONFIG_PACKAGE_luci-app-adguardhome is not set
 # CONFIG_PACKAGE_luci-app-alist is not set
-# CONFIG_PACKAGE_luci-app-argon-configis not set
 # CONFIG_PACKAGE_luci-app-cifs-mount is not set
 # CONFIG_PACKAGE_luci-app-ddns is not set
 # CONFIG_PACKAGE_luci-app-netdata is not set
