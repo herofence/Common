@@ -89,11 +89,11 @@ jobs:
         run: |
           cd ./owrt
 
-          $GITHUB_WORKSPACE/Scripts/Settings.sh
+          $GITHUB_WORKSPACE/scripts/Settings.sh
 
           cd ./package
 
-          $GITHUB_WORKSPACE/Scripts/Plugins.sh
+          $GITHUB_WORKSPACE/scripts/Plugins.sh
 
       - name: 生成配置文件
         run: |
@@ -102,7 +102,7 @@ jobs:
           rm -rf ./tmp* ./.config*
           cat $GITHUB_WORKSPACE/Config/$OWRT_TARGET.txt $GITHUB_WORKSPACE/Config/General.txt >> .config
 
-          $GITHUB_WORKSPACE/Scripts/Extras.sh
+          $GITHUB_WORKSPACE/scripts/Extras.sh
 
           make defconfig
 
