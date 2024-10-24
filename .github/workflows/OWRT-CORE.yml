@@ -67,10 +67,8 @@ jobs:
           echo "OWRT_PW=$OWRT_PW" >> $GITHUB_ENV
           echo "OWRT_IP=$OWRT_IP" >> $GITHUB_ENV
 
-      - name: 检查文件
-        run: |
-          dos2unix $(find ./ -maxdepth 2 -type f -iregex ".*\(txt\|sh\)$")
-          chmod +x $(find ./ -maxdepth 2 -type f -iname "*.sh")
+      - name: 检查
+        uses: actions/checkout@main
 
       - name: 复制仓库
         run: |
