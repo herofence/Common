@@ -50,16 +50,11 @@ function git_sparse_clone() {
 # 添加额外插件
 #mosdns
 git clone --depth=1 https://github.com/sbwml/luci-app-mosdns package/luci-app-mosdns
-# msd_lite
-# git_sparse_clone master https://github.com/syb999/openwrt-19.07.1 package/network/services/msd_lite
-git clone --depth=1 https://github.com/ximiTech/luci-app-msd_lite package/luci-app-msd_lite
-git clone --depth=1 https://github.com/ximiTech/msd_lite package/msd_lite
 # 主题
 git clone --depth=1 https://github.com/kiddin9/luci-theme-edge package/luci-theme-edge
 git clone --depth=1 https://github.com/jerrykuku/luci-theme-argon package/luci-theme-argon
 git clone --depth=1 https://github.com/jerrykuku/luci-app-argon-config package/luci-app-argon-config
 git clone https://github.com/y9858/luci-theme-opentomcat package/luci-theme-opentomcat
-# git clone --depth=1 https://github.com/xiaoqingfengATGH/luci-theme-infinityfreedom package/luci-theme-infinityfreedom
 # smartdns
 git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns package/luci-app-smartdns
 git clone --depth=1 https://github.com/pymumu/openwrt-smartdns package/smartdns
@@ -75,33 +70,17 @@ git clone --depth=1 https://github.com/linkease/nas-packages package/nas-package
 git clone --depth=1 https://github.com/linkease/nas-packages-luci package/nas-packages-luci
 # 内网测速
 git clone https://github.com/sirpdboy/netspeedtest.git package/netspeedtest
-# 访问控制
-# git clone --depth=1 https://github.com/k-szuster/luci-access-control-package package/luci-app-access-control
 # 应用过滤
 git clone https://github.com/destan19/OpenAppFilter.git package/OpenAppFilter
-#DDNS-GO
-# git clone https://github.com/sirpdboy/luci-app-ddns-go.git package/ddns-go
-#luci-app-tailscale
-# git clone https://github.com/asvow/luci-app-tailscale package/luci-app-tailscale
-# Alist
-# git clone --depth=1 https://github.com/sbwml/luci-app-alist package/luci-app-alist
+
 #其它
 git clone --depth=1 -b openwrt-18.06 https://github.com/tty228/luci-app-wechatpush package/luci-app-serverchan
 git clone --depth=1 https://github.com/ilxp/luci-app-ikoolproxy package/luci-app-ikoolproxy
 git clone --depth=1 https://github.com/esirplayground/luci-app-poweroff package/luci-app-poweroff
-git clone --depth=1 https://github.com/destan19/OpenAppFilter package/OpenAppFilter
 git clone --depth=1 https://github.com/Jason6111/luci-app-netdata package/luci-app-netdata
 git_sparse_clone main https://github.com/Lienol/openwrt-package luci-app-filebrowser luci-app-ssr-mudb-server
 git_sparse_clone openwrt-18.06 https://github.com/immortalwrt/luci applications/luci-app-eqos
-# git clone --depth=1 https://github.com/kongfl888/luci-app-adguardhome package/luci-app-adguardhome
-
-# 拉取immortalwrt仓库组件
-rm -rf feeds/packages/net/{haproxy,msd_lite,curl}
-merge_package master https://github.com/immortalwrt/packages feeds/packages/net net/haproxy net/msd_lite net/curl
 
 # 科学上网插件
-# git clone --depth=1 -b main https://github.com/fw876/helloworld package/luci-app-ssr-plus
 git clone https://github.com/xiaorouji/openwrt-passwall-packages package/openwrt-passwall
 git clone https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
-# git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall2 package/luci-app-passwall2
-# git_sparse_clone master https://github.com/vernesong/OpenClash luci-app-openclash
