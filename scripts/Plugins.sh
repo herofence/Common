@@ -49,38 +49,36 @@ function git_sparse_clone() {
 
 # 添加额外插件
 #mosdns
-git clone --depth=1 https://github.com/sbwml/luci-app-mosdns package/luci-app-mosdns
+git clone --depth=1 https://github.com/sbwml/luci-app-mosdns.git ./luci-app-mosdns
 # 主题
-git clone --depth=1 https://github.com/kiddin9/luci-theme-edge package/luci-theme-edge
-git clone --depth=1 -b 18.06 https://github.com/jerrykuku/luci-theme-argon package/luci-theme-argon
-git clone --depth=1 https://github.com/jerrykuku/luci-app-argon-config package/luci-app-argon-config
-git clone https://github.com/y9858/luci-theme-opentomcat package/luci-theme-opentomcat
+git clone --depth=1 https://github.com/kiddin9/luci-theme-edge.git ./luci-theme-edge
+git clone --depth=1 -b 18.06 https://github.com/jerrykuku/luci-theme-argon.git ./luci-theme-argon
+git clone --depth=1 https://github.com/jerrykuku/luci-app-argon-config.git ./luci-app-argon-config
+git clone https://github.com/y9858/luci-theme-opentomcat.git ./luci-theme-opentomcat
 # smartdns
-git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns package/luci-app-smartdns
-git clone --depth=1 https://github.com/pymumu/openwrt-smartdns package/smartdns
+git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns.git ./luci-app-smartdns
+git clone --depth=1 https://github.com/pymumu/openwrt-smartdns.git ./smartdns
 # diskman
-git clone https://github.com/lisaac/luci-app-diskman package/applications/luci-app-diskman
+git clone https://github.com/lisaac/luci-app-diskman.git ./applications/luci-app-diskman
 # dockerman
-git clone https://github.com/WYC-2020/luci-app-dockerman package/applications/luci-app-dockerman
+git clone https://github.com/WYC-2020/luci-app-dockerman.git ./applications/luci-app-dockerman
 # lucky
-git clone https://github.com/gdy666/luci-app-lucky.git package/lucky
+git clone https://github.com/gdy666/luci-app-lucky.git ./lucky
 # istore
-git clone --depth=1 https://github.com/linkease/istore package/istore
-git clone --depth=1 https://github.com/linkease/nas-packages package/nas-packages
-git clone --depth=1 https://github.com/linkease/nas-packages-luci package/nas-packages-luci
+git clone --depth=1 https://github.com/linkease/istore.git ./istore
+git clone --depth=1 https://github.com/linkease/nas-packages.git ./nas-packages
+git clone --depth=1 https://github.com/linkease/nas-packages-luci.git ./nas-packages-luci
 # 内网测速
-git clone https://github.com/sirpdboy/netspeedtest.git package/netspeedtest
+git clone https://github.com/sirpdboy/netspeedtest.git ./netspeedtest
 # 应用过滤
-git clone https://github.com/destan19/OpenAppFilter.git package/OpenAppFilter
+git clone https://github.com/destan19/OpenAppFilter.git ./OpenAppFilter
 
 #其它
-git clone --depth=1 -b openwrt-18.06 https://github.com/tty228/luci-app-wechatpush package/luci-app-serverchan
-git clone --depth=1 https://github.com/ilxp/luci-app-ikoolproxy package/luci-app-ikoolproxy
-git clone --depth=1 https://github.com/esirplayground/luci-app-poweroff package/luci-app-poweroff
-git clone --depth=1 https://github.com/Jason6111/luci-app-netdata package/luci-app-netdata
-git_sparse_clone main https://github.com/Lienol/openwrt-package luci-app-filebrowser luci-app-ssr-mudb-server
-git_sparse_clone openwrt-18.06 https://github.com/immortalwrt/luci applications/luci-app-eqos
+git clone --depth=1 -b openwrt-18.06 https://github.com/tty228/luci-app-wechatpush.git ./luci-app-serverchan
+git clone --depth=1 https://github.com/ilxp/luci-app-ikoolproxy.git ./luci-app-ikoolproxy
+git clone --depth=1 https://github.com/esirplayground/luci-app-poweroff.git ./luci-app-poweroff
+git clone --depth=1 https://github.com/Jason6111/luci-app-netdata.git ./luci-app-netdata
 
 # 科学上网插件
-git clone https://github.com/xiaorouji/openwrt-passwall-packages package/openwrt-passwall
-git clone https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
+git clone https://github.com/xiaorouji/openwrt-passwall-packages.git ./openwrt-passwall
+git clone https://github.com/xiaorouji/openwrt-passwall.git ./luci-app-passwall
