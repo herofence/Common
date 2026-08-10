@@ -3,8 +3,8 @@ name: OpenWrt_X86-X64
 on:
   workflow_dispatch:
   schedule:
-  # 每周五 5:00执行一次
-    - cron: 0 21 * * THU
+  # 每周五 3:00执行一次
+    - cron: 0 18 * * THU
 
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
