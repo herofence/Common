@@ -1,17 +1,35 @@
 #!/bin/bash
 
+#移除dnsmasq冲突
+sed -i '/CONFIG_PACKAGE_dnsmasq/d' .config
+echo "CONFIG_PACKAGE_dnsmasq=n" >> .config
+
+#确保OpenClash被选中（防止sed匹配失败）
+sed -i '/CONFIG_PACKAGE_luci-app-openclash/d' .config
+echo "CONFIG_PACKAGE_luci-app-openclash=y" >> .config
+
+#验证OpenClash是否被正确选中
+if grep -q "CONFIG_PACKAGE_luci-app-openclash=y" .config; then
+    echo "? OpenClash 配置成功！"
+else
+    echo "? OpenClash 配置失败！"
+    echo "当前 .config 中 OpenClash 相关配置："
+    grep -i "openclash" .config || echo "未找到 OpenClash 配置"
+fi
+
+# 仅预置GeoIP和GeoSite数据库
+
 mkdir -p files/etc/openclash/core
 
-CLASH_DEV_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/dev/clash-linux-${1}.tar.gz"
-CLASH_TUN_URL=$(curl -fsSL https://api.github.com/repos/vernesong/OpenClash/contents/master/premium\?ref\=core | grep download_url | grep $1 | awk -F '"' '{print $4}' | grep -v 'v3')
-CLASH_META_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/meta/clash-linux-${1}.tar.gz"
 GEOIP_URL="https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geoip.dat"
 GEOSITE_URL="https://github.com/Loyalsoldier/v2ray-rules-dat/releases/latest/download/geosite.dat"
 
-wget -qO- $CLASH_DEV_URL | tar xOvz > files/etc/openclash/core/clash
-wget -qO- $CLASH_TUN_URL | gunzip -c > files/etc/openclash/core/clash_tun
-wget -qO- $CLASH_META_URL | tar xOvz > files/etc/openclash/core/clash_meta
-wget -qO- $GEOIP_URL > files/etc/openclash/GeoIP.dat
-wget -qO- $GEOSITE_URL > files/etc/openclash/GeoSite.dat
+echo "正在下载 GeoIP 和 GeoSite 数据库..."
+wget -qO- $GEOIP_URL > files/etc/openclash/GeoIP.dat && echo "? GeoIP.dat 下载成功" || echo "? GeoIP.dat 下载失败"
+wget -qO- $GEOSITE_URL > files/etc/openclash/GeoSite.dat && echo "? GeoSite.dat 下载成功" || echo "? GeoSite.dat 下载失败"
 
-chmod +x files/etc/openclash/core/clash*
+# 创建空的内核文件占位（可选）
+touch files/etc/openclash/core/clash
+touch files/etc/openclash/core/clash_tun
+touch files/etc/openclash/core/clash_meta
+echo "? 数据库预置完成（内核文件为空，用户可在线下载）"
