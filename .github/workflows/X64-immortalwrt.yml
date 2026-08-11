@@ -183,12 +183,24 @@ jobs:
         cd $OPENWRT_PATH/bin/targets/*/*
         cat sha256sums
         cp $OPENWRT_PATH/.config build.config
-        mv -f $OPENWRT_PATH/bin/packages/*/*/*.ipk packages
+        #打包 ipk 文件
+        echo "正在查找 ipk 文件..."
+        IPK_COUNT=$(find $OPENWRT_PATH -name "*.ipk" 2>/dev/null | wc -l)
+        echo "找到 $IPK_COUNT 个 ipk 文件"
+        if [ $IPK_COUNT -gt 0 ]; then
+        # 创建 packages 目录并复制所有 ipk
+        mkdir -p packages
+        find $OPENWRT_PATH -name "*.ipk" -exec cp {} packages/ \; 2>/dev/null
+        echo "打包 packages 目录..."
         tar -zcf Packages.tar.gz packages
-        rm -rf packages feeds.buildinfo version.buildinfo
-        echo "KERNEL=$(cat *.manifest | grep ^kernel | cut -d- -f2 | tr -d ' ')" >> $GITHUB_ENV
-        echo "FIRMWARE_PATH=$PWD" >> $GITHUB_ENV
-
+        rm -rf packages
+        echo "Packages.tar.gz 创建完成"
+        else
+        echo "未找到 ipk 文件，跳过打包"
+        # 创建一个空的 tar 文件避免错误
+        tar -zcf Packages.tar.gz --files-from /dev/null
+        fi
+  
     - name: 上传固件目录
       if: steps.compile.outputs.status == 'success' && env.FIRMWARE_RELEASE != 'true'
       uses: actions/upload-artifact@main
