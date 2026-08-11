@@ -38,6 +38,16 @@ function merge_package() {
 	cd "$rootdir"
 }
 
+echo "=== 移除有问题的 feeds 包 ==="
+rm -rf feeds/packages/net/bmx7*
+rm -rf feeds/packages/net/olsrd*
+rm -rf feeds/packages/net/batman-adv*
+rm -rf feeds/luci/applications/luci-app-babeld
+rm -rf feeds/luci/applications/luci-app-bmx7
+rm -rf feeds/luci/applications/luci-app-olsr*
+rm -rf feeds/luci/protocols/luci-proto-batman-adv
+rm -rf feeds/packages/net/prometheus-node-exporter-lua
+
 # 移除要替换的包 (适配 ImmortalWrt 路径)
 rm -rf feeds/packages/net/mosdns
 rm -rf feeds/packages/net/smartdns
@@ -111,6 +121,19 @@ git clone https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwal
 
 # 更改默认主题
 sed -i "s/luci-theme-bootstrap/luci-theme-argon/g" ./feeds/luci/collections/luci/Makefile
+
+# ========== 修复依赖问题 ==========
+echo "=== 修复依赖问题 ==="
+# 修复 netspeedtest 的 Python 依赖
+if [ -f "package/netspeedtest/luci-app-netspeedtest/Makefile" ]; then
+    sed -i 's/+python3-pkg-resources//g' package/netspeedtest/luci-app-netspeedtest/Makefile
+    sed -i 's/+python3-email//g' package/netspeedtest/luci-app-netspeedtest/Makefile
+fi
+
+# 修复 video/sdl3 的 wayland 依赖
+if [ -f "feeds/video/sdl3/Makefile" ]; then
+    sed -i 's/+libwayland//g' feeds/video/sdl3/Makefile
+fi
 
 # x86 型号只显示 CPU 型号 (适配 ImmortalWrt 路径)
 # ImmortalWrt 可能在 package/immortalwrt/autocore 或 package/lean/autocore
