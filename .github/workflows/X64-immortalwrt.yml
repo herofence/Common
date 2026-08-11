@@ -140,10 +140,19 @@ jobs:
         chmod +x $GITHUB_WORKSPACE/scripts/*.sh
         chmod +x $DIY_SCRIPT
         cd $OPENWRT_PATH
+        # 执行自定义脚本（包含 feeds 更新）
+        $GITHUB_WORKSPACE/$DIY_SCRIPT
+        # 执行预设脚本
         $GITHUB_WORKSPACE/$DIY_SCRIPT
         $GITHUB_WORKSPACE/scripts/preset-clash-core.sh $CLASH_KERNEL
         $GITHUB_WORKSPACE/scripts/theme-setting.sh
+        # 生成默认配置
         make defconfig
+        # 显示配置文件内容
+        echo "=== .config 文件统计 ==="
+        grep -c "^CONFIG_" .config
+        echo "=== 已选择的包 ==="
+        grep "^CONFIG_PACKAGE_" .config | wc -l
 
     - name: 下载配件包
       run: |
