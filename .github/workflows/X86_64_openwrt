@@ -6,9 +6,9 @@ on:
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
   REPO_BRANCH: master
-  CONFIG_FILE: immortalwrt/x86_64/defconfig
-  DIY_P1_SH: immortalwrt/diy-part1.sh
-  DIY_P2_SH: immortalwrt/diy-part2.sh
+  CONFIG_FILE: configs/openwrt.config
+  DIY_P1_SH: scripts/diy-part1.sh
+  DIY_P2_SH: scripts/diy-part2.sh
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
