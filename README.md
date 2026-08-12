@@ -1,4 +1,4 @@
-# openwrt-rockchip-X64
+# openwrt-immortalwrt-X64
 `.github/workflow`*代码仓库<br>*
 `Config/General.txt`*增加/删除插件设置<br>*
 `Scripts/Settings.sh` openwrt-LEDE*系统参数设置<br>*
