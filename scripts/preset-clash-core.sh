@@ -1,12 +1,4 @@
 #!/bin/bash
-#=================================================
-# File name: perest-clash-core.sh
-# System Required: Linux
-# Version: 1.0
-# Lisence: MIT
-# Author: SuLingGG
-# Blog: https://mlapp.cn
-#=================================================
 mkdir -p files/etc/openclash/core
 
 CLASH_DEV_URL="https://raw.githubusercontent.com/vernesong/OpenClash/core/master/dev/clash-linux-${1}.tar.gz"
