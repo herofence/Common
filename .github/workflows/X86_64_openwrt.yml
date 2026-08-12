@@ -12,8 +12,8 @@ env:
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
-  OPENWRT_NAME: immortalwrt
-  OPENWRT_NAME1: x86_64
+  OPENWRT_NAME: scripts
+  OPENWRT_NAME1: configs
 
 jobs:
   build:
