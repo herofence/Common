@@ -70,25 +70,25 @@ jobs:
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
 
-    - name: Update & install feeds
+    - name: 更新和安装源
       working-directory: ./openwrt
       run: |
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         
-    - name: Load feeds.conf.default
+    - name: 加载默认配置
       run: |
         chmod +x $OPENWRT_NAME/*.sh
         cd openwrt
         $GITHUB_WORKSPACE/$DIY_P1_SH
 
-    - name: Load config
+    - name: 加载自定义配置
       run: |
         [ -e "$CONFIG_FILE" ] && cat "$CONFIG_FILE" > openwrt/.config
         chmod +x $OPENWRT_NAME/*.sh && cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
 
-    - name: Download the installation package
+    - name: 下载安装包
       id: package
       run: |
         cd openwrt
@@ -108,7 +108,7 @@ jobs:
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
              
-    - name: Compile the firmware
+    - name: 编译固件
       id: compile
       run: |
         cd openwrt
@@ -118,7 +118,7 @@ jobs:
         echo "date2=$(date "+%Y年%m月%d日")" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
-    - name: Organize and Rename Files
+    - name: 整理文件
       id: organize
       if: ${{ env.UPLOAD_FIRMWARE == 'true' && !cancelled() }}
       run: |
@@ -130,14 +130,14 @@ jobs:
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
         
-    - name: Upload the firmware to github
+    - name: 上传固件
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
         name: ${{ env.date1 }}_${{ env.OPENWRT_NAME }}_${{ env.OPENWRT_NAME1 }}
         path: ${{ env.FIRMWARE }}
 
-    - name: Generate release tags
+    - name: 发布标签
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
