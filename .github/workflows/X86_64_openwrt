@@ -20,7 +20,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - name: Maximize build space
+    - name: 容量设置
       uses: easimon/maximize-build-space@master
       with:
         root-reserve-mb: 512
@@ -30,12 +30,12 @@ jobs:
         remove-haskell: 'true'
         remove-codeql: 'true'
         
-    - name: Check out the project branch
+    - name: 查看项目代码
       uses: actions/checkout@main
       with:
           fetch-depth: 0
           
-    - name: Clean build caches
+    - name: 清理缓存
       run: |
         echo "Cleaning previous build artifacts and caches..."
         sudo rm -rf $GITHUB_WORKSPACE/openwrt || true
@@ -46,7 +46,7 @@ jobs:
         rm -rf ~/.cache/* || true
         echo "Cache cleanup complete."
         
-    - name: Initialize the compilation environment
+    - name: 初始化编译环境
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
@@ -59,14 +59,14 @@ jobs:
         sudo -E apt-get -qq clean ) &
         sudo timedatectl set-timezone "$TZ"
         
-    - name: Initialize Environment and Display System Info
+    - name: 系统信息
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
         chmod +x $OPENWRT_NAME/*.sh
         $GITHUB_WORKSPACE/$OPENWRT_NAME/system-Information.sh
         
-    - name: Download firmware source code
+    - name: 下载源码
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
 
