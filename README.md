@@ -7,8 +7,7 @@
 `Scripts/Renames.sh`*openwrt重命名<br>*
 `Depends.txt`*云编译过程中需要加载的依赖文件<br>*
 云编译OpenWRT固件，源码来自LEDE，编译菜单来自VIKINGYFY，passwall插件来自xiaorouji<br>
-https://github.com/coolsnowwolf/lede<br>
+[https://github.com/coolsnowwolf/lede](https://github.com/DHDAXCW/OpenWRT_x86_x64)<br>
 https://github.com/immortalwrt/immortalwrt<br>
 https://github.com/xiaorouji/openwrt-passwall<br>
-https://github.com/VIKINGYFY/OpenWRT-CI<br>
 https://github.com/vernesong/OpenClash<br>
