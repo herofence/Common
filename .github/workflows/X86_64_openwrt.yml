@@ -77,7 +77,7 @@ jobs:
         cd openwrt
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
         # 获取源码提交信息（由于是 depth 1，获取最新一次提交）
-        COMMIT_AUTHOR=$(git show -s --date=short --format="作者: %an" 2>/dev/null || echo "作者: 未知")
+        COMMIT_AUTHOR=$(git show -s --date=short --format="作者: herofence" 2>/dev/null || echo "作者: 未知")
         echo "COMMIT_AUTHOR=$COMMIT_AUTHOR" >> $GITHUB_ENV
         COMMIT_DATE=$(git show -s --date=short --format="时间: %ci" 2>/dev/null || echo "时间: 未知")
         echo "COMMIT_DATE=$COMMIT_DATE" >> $GITHUB_ENV
