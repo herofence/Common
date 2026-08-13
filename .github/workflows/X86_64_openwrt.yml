@@ -139,6 +139,20 @@ jobs:
       if: ${{ env.UPLOAD_FIRMWARE == 'true' && !cancelled() }}
       run: |
         cd openwrt/bin/targets/x86/64
+        # 复制 build.config 和 config.buildinfo 到固件目录
+        [ -f "$OPENWRT_PATH/.config" ] && cp "$OPENWRT_PATH/.config" build.config
+        # 生成 config.buildinfo 文件
+        cat > config.buildinfo << EOF
+        CONFIG_TARGET_BOARD=${{ env.DEVICE_TARGET }}
+        CONFIG_TARGET_SUBTARGET=${{ env.DEVICE_SUBTARGET }}
+        CONFIG_KERNEL_VERSION=${{ env.KERNEL_VER }}
+        CONFIG_REPO_URL=${{ env.REPO_URL }}
+        CONFIG_REPO_BRANCH=${{ env.REPO_BRANCH }}
+        CONFIG_BUILD_DATE=${{ env.date1 }}
+        CONFIG_BUILD_NUMBER=${{ github.run_number }}
+        CONFIG_RANDOM_CODE=${{ steps.random.outputs.random_code }}
+        EOF
+        # 删除不需要的文件
         rm -rf packages *rootfs.tar.gz *rootfs.img.gz *combined.img.gz *.bin *.config *.buildinfo *.json sha256sums *.manifest
         for file in immortalwrt-*-*.img.gz; do
             mv "$file" "$file"
@@ -150,7 +164,7 @@ jobs:
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success' && !cancelled()
       with:
-        name: ${{ env.date1 }}_${{ env.OPENWRT_NAME }}_${{ env.OPENWRT_NAME1 }}
+        name: immortalwrt_${{ env.date1 }}_${{ env.OPENWRT_NAME }}_${{ env.OPENWRT_NAME1 }}
         path: ${{ env.FIRMWARE }}
 
     - name: 发布固件
