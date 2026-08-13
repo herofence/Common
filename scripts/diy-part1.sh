@@ -17,7 +17,6 @@ rm -rf feeds/luci/applications/luci-app-argon-config
 # Clone community packages to package/community
 mkdir package/community
 pushd package/community
-git clone --depth=1 https://github.com/sbwml/luci-app-mosdns package/luci-app-mosdns
 git clone https://github.com/jerrykuku/luci-theme-argon package/luci-theme-argon
 git clone --depth=1 https://github.com/jerrykuku/luci-app-argon-config package/luci-app-argon-config
 git clone https://github.com/y9858/luci-theme-opentomcat package/luci-theme-opentomcat
