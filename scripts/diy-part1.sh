@@ -46,59 +46,68 @@ git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 
 # ===== 修复 dockerd 编译问题 =====
-# 方法1: 使用旧版本的 dockerd (推荐)
 if [ -d "feeds/packages/utils/dockerd" ]; then
     echo "修复 dockerd 编译问题..."
     cd feeds/packages/utils/dockerd
-    # 回退到稳定版本 v27.0.3
-    git fetch --tags
-    git checkout v27.0.3 -- . 2>/dev/null || {
-        echo "无法回退 dockerd 版本，尝试修补 Makefile..."
-        # 方法2: 修补 Makefile
-        sed -i '/cp.*bundles\/binary-daemon/s/^/#/' Makefile
-        sed -i 's/cp.*bundles\/binary-daemon.*/& 2>\/dev\/null || true/' Makefile
-    }
-    cd -
-fi
-
-# 方法3: 如果上述方法都不行，创建一个补丁
-if [ -f "feeds/packages/utils/dockerd/Makefile" ]; then
-    # 检查是否还有问题的复制命令
-    if grep -q "cp.*bundles/binary-daemon" feeds/packages/utils/dockerd/Makefile; then
-        echo "创建 dockerd Makefile 补丁..."
+    
+    # 尝试回退到稳定版本
+    if git fetch --tags 2>/dev/null && git checkout v27.0.3 -- . 2>/dev/null; then
+        echo "成功回退 dockerd 到 v27.0.3"
+    else
+        echo "无法回退 dockerd 版本，修补 Makefile..."
         # 备份原文件
-        cp feeds/packages/utils/dockerd/Makefile feeds/packages/utils/dockerd/Makefile.bak
+        cp Makefile Makefile.bak
+        
         # 注释掉有问题的复制命令
-        sed -i '/cp.*bundles\/binary-daemon/s/^/#/' feeds/packages/utils/dockerd/Makefile
-        # 添加错误忽略
-        sed -i '/#cp.*bundles\/binary-daemon/a\	cp $$(DOCKER_BUILD_DIR)/bundles/binary-daemon/* $(1)/usr/bin/ 2>/dev/null || true' feeds/packages/utils/dockerd/Makefile
+        sed -i '/cp.*bundles\/binary-daemon/s/^/#/' Makefile
+        
+        # 添加安全的复制命令
+        sed -i '/#cp.*bundles\/binary-daemon/a\	cp -r $$(DOCKER_BUILD_DIR)/bundles/binary-daemon/* $(1)/usr/bin/ 2>/dev/null || true' Makefile
+        
+        echo "Makefile 修补完成"
     fi
+    cd -
 fi
 # ===== 修复结束 =====
 
-# 更改默认主题
-sed -i "s/luci-theme-bootstrap/luci-theme-argon/g" ./feeds/luci/collections/luci/Makefile
+# 更改默认主题（ImmortalWrt 路径适配）
+if [ -f "./feeds/luci/collections/luci/Makefile" ]; then
+    sed -i "s/luci-theme-bootstrap/luci-theme-argon/g" ./feeds/luci/collections/luci/Makefile
+fi
 
-# x86 型号只显示 CPU 型号
-sed -i 's/${g}.*/${a}${b}${c}${d}${e}${f}${hydrid}/g' package/lean/autocore/files/x86/autocore
+# x86 型号只显示 CPU 型号（ImmortalWrt 路径适配）
+if [ -f "package/immortalwrt/autocore/files/x86/autocore" ]; then
+    sed -i 's/${g}.*/${a}${b}${c}${d}${e}${f}${hydrid}/g' package/immortalwrt/autocore/files/x86/autocore
+elif [ -f "package/lean/autocore/files/x86/autocore" ]; then
+    sed -i 's/${g}.*/${a}${b}${c}${d}${e}${f}${hydrid}/g' package/lean/autocore/files/x86/autocore
+fi
 
-# 修改本地时间格式
-sed -i 's#os.date()#os.date("%Y-%m-%d %H:%M:%S") .. " " .. translate(os.date("%A"))#g' package/lean/autocore/files/*/index.htm
-sed -i 's/os.date("%c")/os.date("%Y-%m-%d %H:%M:%S")/g' feeds/luci/modules/luci-mod-admin-mini/luasrc/controller/mini/system.lua
+# 修改本地时间格式（ImmortalWrt 路径适配）
+find package/ -path "*/autocore/files/*/index.htm" -exec sed -i 's#os.date()#os.date("%Y-%m-%d %H:%M:%S") .. " " .. translate(os.date("%A"))#g' {} \; 2>/dev/null
+find feeds/luci/ -path "*/system.lua" -exec sed -i 's/os.date("%c")/os.date("%Y-%m-%d %H:%M:%S")/g' {} \; 2>/dev/null
 
-# 最大连接数修改为65535
-sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=65535' package/base-files/files/etc/sysctl.conf
+# 最大连接数修改为65535（适配不同路径）
+if [ -f "package/base-files/files/etc/sysctl.conf" ]; then
+    sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=65535' package/base-files/files/etc/sysctl.conf
+fi
 
-# 修改版本为编译日期
+# 修改版本为编译日期（ImmortalWrt 路径适配）
 date_version=$(date +"%y.%m.%d")
-orig_version=$(cat "package/lean/default-settings/files/zzz-default-settings" | grep DISTRIB_REVISION= | awk -F "'" '{print $2}')
-sed -i "s/${orig_version}/R${date_version} by herofence/g" package/lean/default-settings/files/zzz-default-settings
+if [ -f "package/immortalwrt/default-settings/files/zzz-default-settings" ]; then
+    orig_version=$(cat "package/immortalwrt/default-settings/files/zzz-default-settings" | grep DISTRIB_REVISION= | awk -F "'" '{print $2}')
+    sed -i "s/${orig_version}/R${date_version} by herofence/g" package/immortalwrt/default-settings/files/zzz-default-settings
+elif [ -f "package/lean/default-settings/files/zzz-default-settings" ]; then
+    orig_version=$(cat "package/lean/default-settings/files/zzz-default-settings" | grep DISTRIB_REVISION= | awk -F "'" '{print $2}')
+    sed -i "s/${orig_version}/R${date_version} by herofence/g" package/lean/default-settings/files/zzz-default-settings
+fi
 
 # 取消主题默认设置
-find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \;
+find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \; 2>/dev/null
 
 # 修正部分从第三方仓库拉取的软件 Makefile 路径问题
-find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/..\/..\/luci.mk/$(TOPDIR)\/feeds\/luci\/luci.mk/g' {}
-find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/..\/..\/lang\/golang\/golang-package.mk/$(TOPDIR)\/feeds\/packages\/lang\/golang\/golang-package.mk/g' {}
-find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/PKG_SOURCE_URL:=@GHREPO/PKG_SOURCE_URL:=https:\/\/github.com/g' {}
-find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/PKG_SOURCE_URL:=@GHCODELOAD/PKG_SOURCE_URL:=https:\/\/codeload.github.com/g' {}
+find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/..\/..\/luci.mk/$(TOPDIR)\/feeds\/luci\/luci.mk/g' {} 2>/dev/null
+find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/..\/..\/lang\/golang\/golang-package.mk/$(TOPDIR)\/feeds\/packages\/lang\/golang\/golang-package.mk/g' {} 2>/dev/null
+find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/PKG_SOURCE_URL:=@GHREPO/PKG_SOURCE_URL:=https:\/\/github.com/g' {} 2>/dev/null
+find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/PKG_SOURCE_URL:=@GHCODELOAD/PKG_SOURCE_URL:=https:\/\/codeload.github.com/g' {} 2>/dev/null
+
+echo "脚本执行完成"
