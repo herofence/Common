@@ -122,7 +122,7 @@ jobs:
         cd openwrt/bin/targets/x86/64
         rm -rf packages *rootfs.tar.gz *rootfs.img.gz *combined.img.gz *.bin *.config *.buildinfo *.json sha256sums *.manifest
         for file in immortalwrt-*-*.img.gz; do
-            mv "$file" "docker-$file"
+            mv "$file" "$file"
         done
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
