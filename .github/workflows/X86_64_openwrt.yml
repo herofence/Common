@@ -74,6 +74,17 @@ jobs:
     - name: 下载源码
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
+        cd openwrt
+        echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
+        # 获取源码提交信息（由于是 depth 1，获取最新一次提交）
+        COMMIT_AUTHOR=$(git show -s --date=short --format="作者: %an" 2>/dev/null || echo "作者: 未知")
+        echo "COMMIT_AUTHOR=$COMMIT_AUTHOR" >> $GITHUB_ENV
+        COMMIT_DATE=$(git show -s --date=short --format="时间: %ci" 2>/dev/null || echo "时间: 未知")
+        echo "COMMIT_DATE=$COMMIT_DATE" >> $GITHUB_ENV
+        COMMIT_MESSAGE=$(git show -s --date=short --format="内容: %s" 2>/dev/null || echo "内容: 未知")
+        echo "COMMIT_MESSAGE=$COMMIT_MESSAGE" >> $GITHUB_ENV
+        COMMIT_HASH=$(git show -s --date=short --format="hash: %H" 2>/dev/null || echo "hash: 未知")
+        echo "COMMIT_HASH=$COMMIT_HASH" >> $GITHUB_ENV
 
     - name: 更新和安装源
       working-directory: ./openwrt
@@ -114,6 +125,14 @@ jobs:
         echo "date1=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
         echo "date2=$(date "+%Y年%m月%d日")" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
+        # 获取内核版本
+        KERNEL_VER=$(cat bin/targets/x86/64/*.manifest | grep ^kernel | head -1 | cut -d- -f2 | tr -d ' ' 2>/dev/null || echo "未知")
+        echo "KERNEL_VER=$KERNEL_VER" >> $GITHUB_ENV
+        # 获取平台信息
+        DEVICE_TARGET=$(cat .config | grep CONFIG_TARGET_BOARD | awk -F '"' '{print $2}' 2>/dev/null || echo "x86")
+        echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
+        DEVICE_SUBTARGET=$(cat .config | grep CONFIG_TARGET_SUBTARGET | awk -F '"' '{print $2}' 2>/dev/null || echo "64")
+        echo "DEVICE_SUBTARGET=$DEVICE_SUBTARGET" >> $GITHUB_ENV
 
     - name: 整理文件
       id: organize
@@ -134,13 +153,26 @@ jobs:
         name: ${{ env.date1 }}_${{ env.OPENWRT_NAME }}_${{ env.OPENWRT_NAME1 }}
         path: ${{ env.FIRMWARE }}
 
-    - name: 发布标签
+    - name: 发布固件
       id: tag
       if: env.UPLOAD_RELEASE == 'true' && !cancelled()
       run: |
         echo "release_tag=${{ env.date2 }}" >> $GITHUB_OUTPUT
-        touch release.txt
-        echo "📥 固件下载" >> release.txt
+        cat > release.txt << EOF
+        ### 📒 固件信息
+        - 💻 平台架构: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
+        - ⚽ 固件源码: ${{ env.REPO_URL }}
+        - 💝 源码分支: ${{ env.REPO_BRANCH }}
+        - 🚀 内核版本: ${{ env.KERNEL_VER }}
+        - 🌐 默认地址: 192.168.2.1
+        - 🔑 默认密码: password
+        ### 🧊 固件版本
+        - 固件编译前最后一次➦[主源码](${{ env.REPO_URL }}) 更新记录
+        - ${{ env.COMMIT_DATE }}
+        - ${{ env.COMMIT_MESSAGE }}
+        - ${{ env.COMMIT_HASH }}
+        - ${{ env.COMMIT_AUTHOR }}
+        EOF
         echo "status=success" >> $GITHUB_OUTPUT
         
     - name: Publish to release
@@ -151,5 +183,5 @@ jobs:
       with:
         files: ${{ env.FIRMWARE }}/*
         name: ${{ env.date3 }}
-        tag_name: ${{ steps.tag.outputs.release_tag }}
+        tag_name: ${{ steps.tag.outputs.release_tag }}_build${{ github.run_number }}
         body_path: release.txt
