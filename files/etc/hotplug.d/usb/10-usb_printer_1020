@@ -1,0 +1,15 @@
+#!/bin/sh
+set -e
+# the path where you put the .dl file
+FIRMWARE=/etc/sihp1020.dl
+# your printer device path, view the photo in the article
+DEVICE=/dev/usb/lp0
+# debug log file
+LOGFILE=/tmp/hp1020
+
+if [ "$PRODUCT" = "3f0/2b17/100" -a "$ACTION" = "bind" -a "$DEVTYPE" = "usb_device" ]; then
+    echo "$(date): USB printer binded. Trying to upload firmware..." >> $LOGFILE
+    cat $FIRMWARE > $DEVICE
+    echo "$(date): Success. Done." >> $LOGFILE
+    exit
+fi
