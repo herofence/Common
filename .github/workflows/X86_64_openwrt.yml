@@ -175,7 +175,7 @@ jobs:
         EOF
         echo "status=success" >> $GITHUB_OUTPUT
         
-    - name: Publish to release
+    - name: 发布说明
       uses: softprops/action-gh-release@v1
       if: steps.tag.outputs.status == 'success' && !cancelled()
       env:
