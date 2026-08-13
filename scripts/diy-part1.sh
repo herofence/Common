@@ -70,28 +70,28 @@ if [ -d "feeds/packages/utils/dockerd" ]; then
 fi
 # ===== 修复结束 =====
 
-# 更改默认主题（ImmortalWrt 路径适配）
+# 更改默认主题
 if [ -f "./feeds/luci/collections/luci/Makefile" ]; then
     sed -i "s/luci-theme-bootstrap/luci-theme-argon/g" ./feeds/luci/collections/luci/Makefile
 fi
 
-# x86 型号只显示 CPU 型号（ImmortalWrt 路径适配）
+# x86 型号只显示 CPU 型号
 if [ -f "package/immortalwrt/autocore/files/x86/autocore" ]; then
     sed -i 's/${g}.*/${a}${b}${c}${d}${e}${f}${hydrid}/g' package/immortalwrt/autocore/files/x86/autocore
 elif [ -f "package/lean/autocore/files/x86/autocore" ]; then
     sed -i 's/${g}.*/${a}${b}${c}${d}${e}${f}${hydrid}/g' package/lean/autocore/files/x86/autocore
 fi
 
-# 修改本地时间格式（ImmortalWrt 路径适配）
+# 修改本地时间格式
 find package/ -path "*/autocore/files/*/index.htm" -exec sed -i 's#os.date()#os.date("%Y-%m-%d %H:%M:%S") .. " " .. translate(os.date("%A"))#g' {} \; 2>/dev/null
 find feeds/luci/ -path "*/system.lua" -exec sed -i 's/os.date("%c")/os.date("%Y-%m-%d %H:%M:%S")/g' {} \; 2>/dev/null
 
-# 最大连接数修改为65535（适配不同路径）
+# 最大连接数修改为65535
 if [ -f "package/base-files/files/etc/sysctl.conf" ]; then
     sed -i '/customized in this file/a net.netfilter.nf_conntrack_max=65535' package/base-files/files/etc/sysctl.conf
 fi
 
-# 修改版本为编译日期（ImmortalWrt 路径适配）
+# 修改版本为编译日期
 date_version=$(date +"%y.%m.%d")
 if [ -f "package/immortalwrt/default-settings/files/zzz-default-settings" ]; then
     orig_version=$(cat "package/immortalwrt/default-settings/files/zzz-default-settings" | grep DISTRIB_REVISION= | awk -F "'" '{print $2}')
