@@ -152,8 +152,6 @@ jobs:
         CONFIG_BUILD_NUMBER=${{ github.run_number }}
         CONFIG_RANDOM_CODE=${{ steps.random.outputs.random_code }}
         EOF
-        # 删除不需要的文件
-        rm -rf packages *rootfs.tar.gz *rootfs.img.gz *combined.img.gz *.bin *.config *.buildinfo *.json sha256sums *.manifest
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
         
