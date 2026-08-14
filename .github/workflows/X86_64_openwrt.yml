@@ -14,7 +14,6 @@ env:
   DIY_P2_SH: scripts/diy-part2.sh
   THEME_SETTING_SH: scripts/theme-setting.sh
   PRESET_CLASH_SH: scripts/preset-clash-core.sh
-  FIX_DOCKER_SH: scripts/fix-docker.sh
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
@@ -87,32 +86,79 @@ jobs:
         COMMIT_HASH=$(git show -s --date=short --format="hash: %H" 2>/dev/null || echo "hash: 未知")
         echo "COMMIT_HASH=$COMMIT_HASH" >> $GITHUB_ENV
 
-    - name: 修复 Docker
-      working-directory: ./openwrt
-      run: |
-       # 确认当前目录
-        echo "当前工作目录: $(pwd)"
-        # 检查 openwrt 目录结构
-        if [ ! -d "feeds" ]; then
-          echo "错误：feeds 目录不存在，确认是否在 openwrt 目录中"
-          ls -la
-          exit 1
-        fi
-        
-        # 执行 Docker 修复脚本
-        if [ -f "$GITHUB_WORKSPACE/$FIX_DOCKER_SH" ]; then
-          chmod +x $GITHUB_WORKSPACE/$FIX_DOCKER_SH
-          echo "执行 Docker 修复脚本..."
-          bash $GITHUB_WORKSPACE/$FIX_DOCKER_SH
-        else
-          echo "警告：未找到 $FIX_DOCKER_SH 脚本"
-        fi
-
     - name: 更新和安装源
       working-directory: ./openwrt
       run: |
         ./scripts/feeds update -a
         ./scripts/feeds install -a
+
+    - name: 修复 Docker
+      working-directory: ./openwrt
+      run: |
+        echo "开始修复 Docker..."
+        echo "当前目录: $(pwd)"
+        
+        # 确认 feeds 目录存在
+        if [ ! -d "feeds" ]; then
+          echo "错误：feeds 目录不存在"
+          exit 1
+        fi
+        
+        # 删除有问题的 Docker 包
+        echo "删除有问题的 Docker 包..."
+        rm -rf feeds/packages/utils/dockerd
+        rm -rf feeds/packages/utils/docker
+        rm -rf feeds/packages/utils/docker-compose
+        rm -rf feeds/packages/utils/containerd
+        rm -rf feeds/packages/utils/runc
+        rm -rf feeds/packages/utils/libnetwork
+        rm -rf feeds/luci/applications/luci-app-dockerman
+        rm -rf feeds/luci/applications/luci-app-docker
+        rm -rf feeds/luci/libs/luci-lib-docker
+        
+        # 从 Lean's LEDE 获取 dockerd 核心包
+        echo "从 Lean's LEDE 获取 dockerd..."
+        git clone --depth=1 https://github.com/coolsnowwolf/lede.git /tmp/lede
+        
+        for pkg in dockerd docker containerd runc libnetwork; do
+          if [ -d "/tmp/lede/package/lean/$pkg" ]; then
+            mkdir -p feeds/packages/utils
+            cp -r "/tmp/lede/package/lean/$pkg" feeds/packages/utils/
+            echo "已复制 $pkg"
+          else
+            echo "未找到 $pkg"
+          fi
+        done
+        
+        rm -rf /tmp/lede
+        
+        # 克隆 lisaac 的 luci-app-dockerman
+        echo "克隆 lisaac/luci-app-dockerman..."
+        git clone --depth=1 https://github.com/lisaac/luci-app-dockerman.git /tmp/dockerman
+        
+        if [ -d "/tmp/dockerman/luci-app-dockerman" ]; then
+          mkdir -p feeds/luci/applications
+          cp -r /tmp/dockerman/luci-app-dockerman feeds/luci/applications/
+          echo "已复制 luci-app-dockerman"
+        fi
+        
+        if [ -d "/tmp/dockerman/luci-lib-docker" ]; then
+          mkdir -p feeds/luci/libs
+          cp -r /tmp/dockerman/luci-lib-docker feeds/luci/libs/
+          echo "已复制 luci-lib-docker"
+        fi
+        
+        rm -rf /tmp/dockerman
+        
+        # 重新安装 feeds
+        echo "重新安装 feeds..."
+        ./scripts/feeds install -a
+        
+        echo "Docker 修复完成！"
+        echo "检查 Docker 包："
+        find feeds/ -name "*docker*" -o -name "*containerd*" -o -name "*runc*" | while read pkg; do
+          echo "  - $pkg"
+        done
         
     - name: 加载默认配置
       run: |
@@ -181,9 +227,6 @@ jobs:
         echo "清理不需要的文件..."
         rm -rf packages
         rm -f *rootfs.tar.gz *rootfs.img.gz *combined.img.gz *.bin *.json sha256sums *.manifest
-        
-        # 注意：不要删除 *.config 和 *.buildinfo，因为它们是刚创建的
-        # 如果需要删除，请明确指定文件名
         
         # 列出最终保留的文件
         echo "最终保留的文件："
