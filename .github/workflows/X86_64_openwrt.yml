@@ -154,9 +154,6 @@ jobs:
         EOF
         # 删除不需要的文件
         rm -rf packages *rootfs.tar.gz *rootfs.img.gz *combined.img.gz *.bin *.config *.buildinfo *.json sha256sums *.manifest
-        for file in immortalwrt-*-*.img.gz; do
-            mv "$file" "$file"
-        done
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
         
