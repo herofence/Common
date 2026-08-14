@@ -86,6 +86,12 @@ jobs:
         COMMIT_HASH=$(git show -s --date=short --format="hash: %H" 2>/dev/null || echo "hash: 未知")
         echo "COMMIT_HASH=$COMMIT_HASH" >> $GITHUB_ENV
 
+    - name: 修复 Docker
+      working-directory: ./
+      run: |
+        chmod +x $GITHUB_WORKSPACE/scripts/fix-docker.sh
+        $GITHUB_WORKSPACE/scripts/fix-docker.sh
+
     - name: 更新和安装源
       working-directory: ./openwrt
       run: |
