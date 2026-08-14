@@ -14,6 +14,7 @@ env:
   DIY_P2_SH: scripts/diy-part2.sh
   THEME_SETTING_SH: scripts/theme-setting.sh
   PRESET_CLASH_SH: scripts/preset-clash-core.sh
+  FIX_DOCKER_SH: scripts/fix-docker.sh
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
@@ -76,8 +77,8 @@ jobs:
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
         cd openwrt
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
-        # 获取源码提交信息（由于是 depth 1，获取最新一次提交）
-        COMMIT_AUTHOR=$(git show -s --date=short --format="作者: herofence" 2>/dev/null || echo "作者: 未知")
+        # 获取源码提交信息
+        COMMIT_AUTHOR=$(git show -s --date=short --format="作者: %an" 2>/dev/null || echo "作者: 未知")
         echo "COMMIT_AUTHOR=$COMMIT_AUTHOR" >> $GITHUB_ENV
         COMMIT_DATE=$(git show -s --date=short --format="时间: %ci" 2>/dev/null || echo "时间: 未知")
         echo "COMMIT_DATE=$COMMIT_DATE" >> $GITHUB_ENV
@@ -87,10 +88,23 @@ jobs:
         echo "COMMIT_HASH=$COMMIT_HASH" >> $GITHUB_ENV
 
     - name: 修复 Docker
-      working-directory: ./
+      working-directory: ./openwrt
       run: |
-        chmod +x $GITHUB_WORKSPACE/scripts/fix-docker.sh
-        $GITHUB_WORKSPACE/scripts/fix-docker.sh
+        # 检查 openwrt 目录是否存在
+        if [ ! -d "$GITHUB_WORKSPACE/openwrt" ]; then
+          echo "错误：openwrt 目录不存在"
+          exit 1
+        fi
+        
+        # 执行 Docker 修复脚本
+        if [ -f "$GITHUB_WORKSPACE/$FIX_DOCKER_SH" ]; then
+          chmod +x $GITHUB_WORKSPACE/$FIX_DOCKER_SH
+          # 需要在 openwrt 目录中执行脚本
+          cd $GITHUB_WORKSPACE/openwrt
+          bash $GITHUB_WORKSPACE/$FIX_DOCKER_SH
+        else
+          echo "警告：未找到 $FIX_DOCKER_SH 脚本，跳过 Docker 修复"
+        fi
 
     - name: 更新和安装源
       working-directory: ./openwrt
@@ -145,8 +159,10 @@ jobs:
       if: ${{ env.UPLOAD_FIRMWARE == 'true' && !cancelled() }}
       run: |
         cd openwrt/bin/targets/x86/64
+        
         # 复制 build.config 和 config.buildinfo 到固件目录
         [ -f "$OPENWRT_PATH/.config" ] && cp "$OPENWRT_PATH/.config" build.config
+        
         # 生成 config.buildinfo 文件
         cat > config.buildinfo << EOF
         CONFIG_TARGET_BOARD=${{ env.DEVICE_TARGET }}
@@ -158,6 +174,19 @@ jobs:
         CONFIG_BUILD_NUMBER=${{ github.run_number }}
         CONFIG_RANDOM_CODE=${{ steps.random.outputs.random_code }}
         EOF
+        
+        # 清理不需要的文件，但保留固件和配置文件
+        echo "清理不需要的文件..."
+        rm -rf packages
+        rm -f *rootfs.tar.gz *rootfs.img.gz *combined.img.gz *.bin *.json sha256sums *.manifest
+        
+        # 注意：不要删除 *.config 和 *.buildinfo，因为它们是刚创建的
+        # 如果需要删除，请明确指定文件名
+        
+        # 列出最终保留的文件
+        echo "最终保留的文件："
+        ls -lah
+        
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
         
@@ -174,15 +203,15 @@ jobs:
       run: |
         echo "release_tag=${{ env.date2 }}" >> $GITHUB_OUTPUT
         cat > release.txt << EOF
-        ### 📒 固件信息
-        - 💻 平台架构: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
-        - ⚽ 固件源码: ${{ env.REPO_URL }}
-        - 💝 源码分支: ${{ env.REPO_BRANCH }}
-        - 🚀 内核版本: ${{ env.KERNEL_VER }}
-        - 🌐 默认地址: 192.168.2.1
-        - 🔑 默认密码: password
-        ### 🧊 固件版本
-        - 固件编译前最后一次➦[主源码](${{ env.REPO_URL }}) 更新记录
+        ### 固件信息
+        - 平台架构: ${{ env.DEVICE_TARGET }}-${{ env.DEVICE_SUBTARGET }}
+        - 固件源码: ${{ env.REPO_URL }}
+        - 源码分支: ${{ env.REPO_BRANCH }}
+        - 内核版本: ${{ env.KERNEL_VER }}
+        - 默认地址: 192.168.2.1
+        - 默认密码: password
+        ### 固件版本
+        - 固件编译前最后一次[主源码](${{ env.REPO_URL }}) 更新记录
         - ${{ env.COMMIT_DATE }}
         - ${{ env.COMMIT_MESSAGE }}
         - ${{ env.COMMIT_HASH }}
@@ -197,6 +226,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         files: ${{ env.FIRMWARE }}/*
-        name: ${{ env.date3 }}
+        name: ${{ env.date2 }}
         tag_name: ${{ steps.tag.outputs.release_tag }}_build${{ github.run_number }}
         body_path: release.txt
