@@ -45,31 +45,6 @@ rm -rf feeds/packages/net/v2ray-geodata
 git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 
-# ===== 修复 dockerd 编译问题 =====
-if [ -d "feeds/packages/utils/dockerd" ]; then
-    echo "修复 dockerd 编译问题..."
-    cd feeds/packages/utils/dockerd
-    
-    # 尝试回退到稳定版本
-    if git fetch --tags 2>/dev/null && git checkout v27.0.3 -- . 2>/dev/null; then
-        echo "成功回退 dockerd 到 v27.0.3"
-    else
-        echo "无法回退 dockerd 版本，修补 Makefile..."
-        # 备份原文件
-        cp Makefile Makefile.bak
-        
-        # 注释掉有问题的复制命令
-        sed -i '/cp.*bundles\/binary-daemon/s/^/#/' Makefile
-        
-        # 添加安全的复制命令
-        sed -i '/#cp.*bundles\/binary-daemon/a\	cp -r $$(DOCKER_BUILD_DIR)/bundles/binary-daemon/* $(1)/usr/bin/ 2>/dev/null || true' Makefile
-        
-        echo "Makefile 修补完成"
-    fi
-    cd -
-fi
-# ===== 修复结束 =====
-
 # 更改默认主题
 if [ -f "./feeds/luci/collections/luci/Makefile" ]; then
     sed -i "s/luci-theme-bootstrap/luci-theme-argon/g" ./feeds/luci/collections/luci/Makefile
