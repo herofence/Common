@@ -97,105 +97,137 @@ jobs:
       run: |
         echo "开始修复 Docker..."
         echo "当前目录: $(pwd)"
-        
         # 确认 feeds 目录存在
         if [ ! -d "feeds" ]; then
           echo "错误：feeds 目录不存在"
           exit 1
         fi
         
-        # 删除有问题的 Docker 包
-        echo "删除有问题的 Docker 包..."
-        rm -rf feeds/packages/utils/dockerd
-        rm -rf feeds/packages/utils/docker
-        rm -rf feeds/packages/utils/docker-compose
-        rm -rf feeds/packages/utils/containerd
-        rm -rf feeds/packages/utils/runc
-        rm -rf feeds/packages/utils/libnetwork
-        rm -rf feeds/luci/applications/luci-app-dockerman
-        rm -rf feeds/luci/applications/luci-app-docker
-        rm -rf feeds/luci/libs/luci-lib-docker
-        # 重新安装 feeds（从 packages feed 获取 Docker 包）
-        echo "重新安装 feeds..."
-        ./scripts/feeds install -a
-        # 检查新安装的 dockerd 版本
-        echo "检查 dockerd 版本..."
-        if [ -f "feeds/packages/utils/dockerd/Makefile" ]; then
-          grep "PKG_VERSION" feeds/packages/utils/dockerd/Makefile
-          
-          # 检查是否是问题版本 29.6.1
-          if grep -q "PKG_VERSION:=29.6.1" feeds/packages/utils/dockerd/Makefile; then
-            echo "检测到问题版本 29.6.1，尝试修复..."
-            
-            # 方法1：修改版本号到旧版本
-            sed -i 's/PKG_VERSION:=29.6.1/PKG_VERSION:=27.0.3/' feeds/packages/utils/dockerd/Makefile
-            sed -i 's/PKG_HASH:=.*/PKG_HASH:=skip/' feeds/packages/utils/dockerd/Makefile
-            
-            echo "已修改版本号："
-            grep "PKG_VERSION\|PKG_HASH" feeds/packages/utils/dockerd/Makefile
-          fi
-        fi
+        # 检查实际的 feeds 目录结构
+        echo "检查 feeds 目录结构："
+        ls -la feeds/
+        echo "---"
+        ls -la feeds/packages/ 2>/dev/null || echo "feeds/packages 不存在"
+        echo "---"
+        ls -la package/feeds/packages/ 2>/dev/null | grep -i docker || echo "package/feeds/packages 中没有 docker"
         
-        # 检查 dockerd Makefile 是否有问题
-        if [ -f "feeds/packages/utils/dockerd/Makefile" ]; then
-          echo "检查 dockerd Makefile 中的问题..."
+        # 查找实际的 dockerd 位置
+        echo "查找 dockerd 实际位置："
+        find . -name "dockerd" -type d 2>/dev/null | head -5
+        find . -name "dockerd" -type l 2>/dev/null | head -5
+        
+        # 查找所有 Docker 相关包的实际位置
+        echo "查找所有 Docker 相关包："
+        find . -path "*/dockerd/Makefile" 2>/dev/null
+        find . -path "*/docker/Makefile" 2>/dev/null
+        find . -path "*/containerd/Makefile" 2>/dev/null
+        find . -path "*/runc/Makefile" 2>/dev/null
+        find . -path "*/luci-app-dockerman/Makefile" 2>/dev/null
+        
+        # 检查 package/feeds 目录
+        echo "检查 package/feeds 目录："
+        find package/feeds -name "*docker*" -o -name "*containerd*" -o -name "*runc*" 2>/dev/null | head -20
+        
+        # 直接检查 package/feeds/packages/utils 目录
+        echo "检查 package/feeds/packages/utils 目录："
+        ls -la package/feeds/packages/utils/ 2>/dev/null | grep -i -E "docker|containerd|runc" || echo "没有找到相关包"
+        
+        # 如果 package/feeds/packages/utils/dockerd 存在，检查其版本
+        if [ -f "package/feeds/packages/utils/dockerd/Makefile" ]; then
+          echo "找到 dockerd Makefile："
+          grep "PKG_VERSION" package/feeds/packages/utils/dockerd/Makefile
           
-          # 查找有问题的复制命令
-          if grep -q "Copying nested executables" feeds/packages/utils/dockerd/Makefile; then
-            echo "找到问题代码，进行修补..."
+          # 检查是否是问题版本
+          if grep -q "PKG_VERSION:=29.6.1" package/feeds/packages/utils/dockerd/Makefile; then
+            echo "检测到问题版本 29.6.1，进行修复..."
             
             # 备份
-            cp feeds/packages/utils/dockerd/Makefile feeds/packages/utils/dockerd/Makefile.bak
+            cp package/feeds/packages/utils/dockerd/Makefile package/feeds/packages/utils/dockerd/Makefile.bak
             
-            # 注释掉有问题的 cp 命令
-            sed -i '/cp.*bundles\/binary-daemon/s/^/#/' feeds/packages/utils/dockerd/Makefile
+            # 方法1：修改版本号
+            sed -i 's/PKG_VERSION:=29.6.1/PKG_VERSION:=27.0.3/' package/feeds/packages/utils/dockerd/Makefile
+            sed -i 's/PKG_HASH:=.*/PKG_HASH:=skip/' package/feeds/packages/utils/dockerd/Makefile
             
-            # 添加安全的复制命令
-            sed -i '/#cp.*bundles\/binary-daemon/a\	cp -r $$(DOCKER_BUILD_DIR)/bundles/binary-daemon/* $(1)/usr/bin/ 2>/dev/null || true' feeds/packages/utils/dockerd/Makefile
-            
-            echo "修补完成"
+            echo "版本已修改为："
+            grep "PKG_VERSION\|PKG_HASH" package/feeds/packages/utils/dockerd/Makefile
+          fi
+          
+          # 方法2：修补 Makefile 中的复制命令
+          if grep -q "Copying nested executables" package/feeds/packages/utils/dockerd/Makefile; then
+            echo "找到问题代码，进行修补..."
+            sed -i '/cp.*bundles\/binary-daemon/s/^/#/' package/feeds/packages/utils/dockerd/Makefile
+            echo "已注释掉有问题的复制命令"
           fi
         fi
         
-        # 克隆 lisaac 的 luci-app-dockerman（如果需要）
-        if [ ! -d "feeds/luci/applications/luci-app-dockerman" ]; then
-          echo "克隆 lisaac/luci-app-dockerman..."
-          git clone --depth=1 https://github.com/lisaac/luci-app-dockerman.git /tmp/dockerman
-          
-          if [ -d "/tmp/dockerman/luci-app-dockerman" ]; then
-            mkdir -p feeds/luci/applications
-            cp -r /tmp/dockerman/luci-app-dockerman feeds/luci/applications/
-            echo "已复制 luci-app-dockerman"
-          fi
-          
-          if [ -d "/tmp/dockerman/luci-lib-docker" ]; then
-            mkdir -p feeds/luci/libs
-            cp -r /tmp/dockerman/luci-lib-docker feeds/luci/libs/
-            echo "已复制 luci-lib-docker"
-          fi
-          
-          rm -rf /tmp/dockerman
+        # 如果 dockerd 不存在，手动创建一个简化版本
+        if [ ! -f "package/feeds/packages/utils/dockerd/Makefile" ]; then
+          echo "未找到 dockerd，创建简化版本..."
+          mkdir -p package/feeds/packages/utils/dockerd
+          cat > package/feeds/packages/utils/dockerd/Makefile << 'EOF'
+include $(TOPDIR)/rules.mk
+
+PKG_NAME:=dockerd
+PKG_VERSION:=27.0.3
+PKG_RELEASE:=1
+
+PKG_SOURCE:=docker-$(PKG_VERSION).tar.gz
+PKG_SOURCE_URL:=https://github.com/moby/moby/archive/refs/tags/v$(PKG_VERSION).tar.gz?/
+PKG_HASH:=skip
+
+PKG_LICENSE:=Apache-2.0
+PKG_LICENSE_FILES:=LICENSE
+
+PKG_BUILD_DEPENDS:=golang/host
+PKG_BUILD_PARALLEL:=1
+PKG_USE_MIPS16:=0
+
+GO_PKG:=github.com/docker/docker
+GO_PKG_BUILD_PKG:=github.com/docker/docker/cmd/dockerd
+GO_PKG_LDFLAGS_X:=main.version=$(PKG_VERSION)
+
+include $(INCLUDE_DIR)/package.mk
+include ../../lang/golang/golang-package.mk
+
+define Package/dockerd
+  SECTION:=utils
+  CATEGORY:=Utilities
+  TITLE:=Docker daemon
+  DEPENDS:=+containerd +runc +tini
+endef
+
+define Package/dockerd/description
+  Docker daemon
+endef
+
+define Package/dockerd/install
+	$(INSTALL_DIR) $(1)/usr/bin
+	$(INSTALL_BIN) $(GO_PKG_BUILD_BIN_DIR)/dockerd $(1)/usr/bin/
+endef
+
+$(eval $(call GoBinPackage,dockerd))
+$(eval $(call BuildPackage,dockerd))
+EOF
+          echo "已创建简化版 dockerd Makefile"
         fi
         
-        # 最后验证
+        # 验证最终结果
         echo "========================================="
-        echo "验证 Docker 包安装情况："
+        echo "最终验证："
         for pkg in dockerd docker containerd runc; do
-          if [ -d "feeds/packages/utils/$pkg" ]; then
-            echo "✓ $pkg 已安装"
-            if [ -f "feeds/packages/utils/$pkg/Makefile" ]; then
-              version=$(grep "PKG_VERSION" "feeds/packages/utils/$pkg/Makefile" | head -1)
-              echo "  $version"
-            fi
+          if [ -f "package/feeds/packages/utils/$pkg/Makefile" ]; then
+            echo "✓ $pkg 已找到"
+            version=$(grep "PKG_VERSION" "package/feeds/packages/utils/$pkg/Makefile" | head -1)
+            echo "  $version"
           else
-            echo "✗ $pkg 未安装"
+            echo "✗ $pkg 未找到"
           fi
         done
         
-        if [ -d "feeds/luci/applications/luci-app-dockerman" ]; then
-          echo "✓ luci-app-dockerman 已安装"
+        if [ -f "package/feeds/luci/applications/luci-app-dockerman/Makefile" ]; then
+          echo "✓ luci-app-dockerman 已找到"
         else
-          echo "✗ luci-app-dockerman 未安装"
+          echo "✗ luci-app-dockerman 未找到"
         fi
         echo "========================================="
         
