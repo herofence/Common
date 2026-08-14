@@ -5,8 +5,15 @@ echo "========================================="
 echo "开始修复 Docker 编译问题..."
 echo "========================================="
 
-# 进入 openwrt 目录
-cd openwrt || exit 1
+# 显示当前目录
+echo "当前目录: $(pwd)"
+
+# 检查是否在 openwrt 目录中
+if [ ! -f "feeds.conf.default" ] && [ ! -d "feeds" ]; then
+    echo "错误：不在 openwrt 目录中"
+    echo "请确保在 openwrt 目录中执行此脚本"
+    exit 1
+fi
 
 # 备份原始 feeds 配置
 if [ -f feeds.conf.default ]; then
@@ -43,12 +50,14 @@ ls -la /tmp/luci-app-dockerman/
 # 复制 luci-app-dockerman
 if [ -d "/tmp/luci-app-dockerman/luci-app-dockerman" ]; then
     echo "复制 luci-app-dockerman..."
+    mkdir -p feeds/luci/applications
     cp -r /tmp/luci-app-dockerman/luci-app-dockerman feeds/luci/applications/
 fi
 
 # 复制 luci-lib-docker（如果存在）
 if [ -d "/tmp/luci-app-dockerman/luci-lib-docker" ]; then
     echo "复制 luci-lib-docker..."
+    mkdir -p feeds/luci/libs
     cp -r /tmp/luci-app-dockerman/luci-lib-docker feeds/luci/libs/
 fi
 
@@ -59,8 +68,10 @@ find /tmp/luci-app-dockerman -maxdepth 2 -type d | while read dir; do
     if [[ "$dirname" == *"docker"* ]] || [[ "$dirname" == *"dockerd"* ]] || [[ "$dirname" == *"containerd"* ]]; then
         echo "找到包: $dirname"
         if [[ "$dirname" == *"luci"* ]]; then
+            mkdir -p feeds/luci/applications
             cp -r "$dir" feeds/luci/applications/ 2>/dev/null
         else
+            mkdir -p feeds/packages/utils
             cp -r "$dir" feeds/packages/utils/ 2>/dev/null
         fi
     fi
@@ -68,11 +79,6 @@ done
 
 # 清理临时文件
 rm -rf /tmp/luci-app-dockerman
-
-# 更新 feeds
-echo "更新 feeds..."
-./scripts/feeds update -a
-./scripts/feeds install -a
 
 # 检查 Docker 包是否已正确安装
 echo "========================================="
@@ -91,21 +97,42 @@ if [ ! -d "feeds/packages/utils/dockerd" ]; then
     
     if [ -d "/tmp/lean-lede/package/lean/dockerd" ]; then
         echo "从 Lean's LEDE 复制 dockerd..."
+        mkdir -p feeds/packages/utils
         cp -r /tmp/lean-lede/package/lean/dockerd feeds/packages/utils/
     fi
     
     if [ -d "/tmp/lean-lede/package/lean/docker" ]; then
         echo "从 Lean's LEDE 复制 docker..."
+        mkdir -p feeds/packages/utils
         cp -r /tmp/lean-lede/package/lean/docker feeds/packages/utils/
+    fi
+    
+    if [ -d "/tmp/lean-lede/package/lean/containerd" ]; then
+        echo "从 Lean's LEDE 复制 containerd..."
+        mkdir -p feeds/packages/utils
+        cp -r /tmp/lean-lede/package/lean/containerd feeds/packages/utils/
+    fi
+    
+    if [ -d "/tmp/lean-lede/package/lean/runc" ]; then
+        echo "从 Lean's LEDE 复制 runc..."
+        mkdir -p feeds/packages/utils
+        cp -r /tmp/lean-lede/package/lean/runc feeds/packages/utils/
     fi
     
     # 清理
     rm -rf /tmp/lean-lede
-    
-    # 重新更新 feeds
-    ./scripts/feeds install -a
 fi
+
+# 更新 feeds（如果需要）
+echo "更新 feeds 索引..."
+./scripts/feeds update -i 2>/dev/null || echo "跳过 feeds 更新"
 
 echo "========================================="
 echo "Docker 修复完成！"
 echo "========================================="
+
+# 显示最终的 Docker 包列表
+echo "最终的 Docker 相关包："
+find feeds/ -name "*docker*" -o -name "*containerd*" -o -name "*runc*" | while read pkg; do
+    echo "  - $pkg"
+done
