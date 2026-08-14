@@ -92,105 +92,7 @@ jobs:
         ./scripts/feeds update -a
         ./scripts/feeds install -a
         
-    - name: 修复 Docker
-      working-directory: ./openwrt
-      run: |
-        echo "开始修复 Docker..."
-        echo "当前目录: $(pwd)"
-        
-        # 修复 dockerd
-        DOCKERD_MAKEFILE="feeds/packages/utils/dockerd/Makefile"
-        if [ -f "$DOCKERD_MAKEFILE" ]; then
-          echo "修复 dockerd..."
-          cp "$DOCKERD_MAKEFILE" "${DOCKERD_MAKEFILE}.bak"
-          sed -i 's/PKG_VERSION:=29.6.1/PKG_VERSION:=27.0.3/' "$DOCKERD_MAKEFILE"
-          sed -i 's/PKG_HASH:=.*/PKG_HASH:=skip/' "$DOCKERD_MAKEFILE"
-          echo "dockerd 已修改为 27.0.3"
-        fi
-        
-        # 修复 docker (CLI)
-        DOCKER_MAKEFILE="feeds/packages/utils/docker/Makefile"
-        if [ -f "$DOCKER_MAKEFILE" ]; then
-          echo "修复 docker CLI..."
-          cp "$DOCKER_MAKEFILE" "${DOCKER_MAKEFILE}.bak"
-          # 检查版本
-          if grep -q "PKG_VERSION:=29.6.1" "$DOCKER_MAKEFILE"; then
-            sed -i 's/PKG_VERSION:=29.6.1/PKG_VERSION:=27.0.3/' "$DOCKER_MAKEFILE"
-            sed -i 's/PKG_HASH:=.*/PKG_HASH:=skip/' "$DOCKER_MAKEFILE"
-            echo "docker CLI 已修改为 27.0.3"
-          else
-            echo "docker CLI 版本:"
-            grep "PKG_VERSION" "$DOCKER_MAKEFILE" | head -1
-          fi
-        fi
-        
-        # 修复 docker-compose
-        COMPOSE_MAKEFILE="feeds/packages/utils/docker-compose/Makefile"
-        if [ -f "$COMPOSE_MAKEFILE" ]; then
-          echo "修复 docker-compose..."
-          cp "$COMPOSE_MAKEFILE" "${COMPOSE_MAKEFILE}.bak"
-          # 保持原版本，只跳过 hash 检查
-          sed -i 's/PKG_HASH:=.*/PKG_HASH:=skip/' "$COMPOSE_MAKEFILE"
-          echo "docker-compose 已修复"
-        fi
-        
-        # 修复 containerd
-        CONTAINERD_MAKEFILE="feeds/packages/utils/containerd/Makefile"
-        if [ -f "$CONTAINERD_MAKEFILE" ]; then
-          echo "修复 containerd..."
-          cp "$CONTAINERD_MAKEFILE" "${CONTAINERD_MAKEFILE}.bak"
-          sed -i 's/PKG_HASH:=.*/PKG_HASH:=skip/' "$CONTAINERD_MAKEFILE"
-          echo "containerd 已修复"
-        fi
-        
-        # 修复 runc
-        RUNC_MAKEFILE="feeds/packages/utils/runc/Makefile"
-        if [ -f "$RUNC_MAKEFILE" ]; then
-          echo "修复 runc..."
-          cp "$RUNC_MAKEFILE" "${RUNC_MAKEFILE}.bak"
-          sed -i 's/PKG_HASH:=.*/PKG_HASH:=skip/' "$RUNC_MAKEFILE"
-          echo "runc 已修复"
-        fi
-        
-        # 修复 tini（如果存在）
-        TINI_MAKEFILE="feeds/packages/utils/tini/Makefile"
-        if [ -f "$TINI_MAKEFILE" ]; then
-          echo "修复 tini..."
-          cp "$TINI_MAKEFILE" "${TINI_MAKEFILE}.bak"
-          sed -i 's/PKG_HASH:=.*/PKG_HASH:=skip/' "$TINI_MAKEFILE"
-          echo "tini 已修复"
-        fi
-        
-        # 检查 dockerd Makefile 中的安装命令
-        echo "检查 dockerd 安装命令..."
-        if [ -f "$DOCKERD_MAKEFILE" ]; then
-          echo "安装部分内容："
-          sed -n '/define Package\/dockerd\/install/,/endef/p' "$DOCKERD_MAKEFILE"
-          
-          # 检查是否有问题的安装命令
-          if grep -q "INSTALL_BIN.*bundles/binary-daemon" "$DOCKERD_MAKEFILE"; then
-            echo "找到 bundles/binary-daemon 安装命令"
-            # 添加错误处理，防止文件不存在时失败
-            sed -i 's/\$(INSTALL_BIN) \$(PKG_BUILD_DIR)\/bundles\/binary-daemon\/docker-proxy/\$(INSTALL_BIN) \$(PKG_BUILD_DIR)\/bundles\/binary-daemon\/docker-proxy 2>\/dev\/null || true/' "$DOCKERD_MAKEFILE"
-            echo "已添加错误处理"
-          fi
-        fi
-        
-        # 验证所有修改
-        echo "========================================="
-        echo "验证所有 Docker 相关包版本："
-        for pkg in dockerd docker docker-compose containerd runc tini; do
-          makefile="feeds/packages/utils/$pkg/Makefile"
-          if [ -f "$makefile" ]; then
-            version=$(grep "PKG_VERSION" "$makefile" | head -1)
-            echo "✓ $pkg: $version"
-          else
-            echo "✗ $pkg: 未找到"
-          fi
-        done
-        echo "========================================="
-        
-        echo "Docker 修复完成！"
+
         
     - name: 加载默认配置
       run: |
@@ -200,12 +102,32 @@ jobs:
         $GITHUB_WORKSPACE/$THEME_SETTING_SH
         $GITHUB_WORKSPACE/$PRESET_CLASH_SH
         
-
     - name: 加载自定义配置
       run: |
         [ -e "$CONFIG_FILE" ] && cat "$CONFIG_FILE" > openwrt/.config
         chmod +x $OPENWRT_NAME/*.sh && cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
+
+    - name: 安装docker
+      id: package
+      run: |
+        cd openwrt
+        echo '
+        CONFIG_DOCKER_CGROUP_OPTIONS=y
+        CONFIG_DOCKER_NET_MACVLAN=y
+        CONFIG_DOCKER_STO_EXT4=y
+        CONFIG_PACKAGE_docker=y
+        CONFIG_PACKAGE_docker-compose=y
+        CONFIG_PACKAGE_dockerd=y
+        CONFIG_PACKAGE_luci-app-dockerman=y
+        CONFIG_PACKAGE_luci-i18n-dockerman-zh-cn=y
+        CONFIG_PACKAGE_luci-lib-docker=y
+        ' >> .config
+        make defconfig
+        make download -j$(nproc)
+        find dl -size -1024c -exec ls -l {} \;
+        find dl -size -1024c -exec rm -f {} \;
+        
 
     - name: 下载安装包
       id: package
