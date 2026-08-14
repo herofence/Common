@@ -90,20 +90,22 @@ jobs:
     - name: 修复 Docker
       working-directory: ./openwrt
       run: |
-        # 检查 openwrt 目录是否存在
-        if [ ! -d "$GITHUB_WORKSPACE/openwrt" ]; then
-          echo "错误：openwrt 目录不存在"
+       # 确认当前目录
+        echo "当前工作目录: $(pwd)"
+        # 检查 openwrt 目录结构
+        if [ ! -d "feeds" ]; then
+          echo "错误：feeds 目录不存在，确认是否在 openwrt 目录中"
+          ls -la
           exit 1
         fi
         
         # 执行 Docker 修复脚本
         if [ -f "$GITHUB_WORKSPACE/$FIX_DOCKER_SH" ]; then
           chmod +x $GITHUB_WORKSPACE/$FIX_DOCKER_SH
-          # 需要在 openwrt 目录中执行脚本
-          cd $GITHUB_WORKSPACE/openwrt
+          echo "执行 Docker 修复脚本..."
           bash $GITHUB_WORKSPACE/$FIX_DOCKER_SH
         else
-          echo "警告：未找到 $FIX_DOCKER_SH 脚本，跳过 Docker 修复"
+          echo "警告：未找到 $FIX_DOCKER_SH 脚本"
         fi
 
     - name: 更新和安装源
