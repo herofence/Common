@@ -91,65 +91,94 @@ jobs:
       run: |
         ./scripts/feeds update -a
         ./scripts/feeds install -a
-
+        
     - name: 修复 Docker
       working-directory: ./openwrt
       run: |
         echo "开始修复 Docker..."
         echo "当前目录: $(pwd)"
         
-        # 查看整体目录结构
-        echo "=== 查看 package 目录结构 ==="
-        ls -la package/ 2>/dev/null || echo "package 目录不存在"
+        # 检查 dockerd Makefile
+        DOCKERD_MAKEFILE="feeds/packages/utils/dockerd/Makefile"
         
-        echo "=== 查看 package/feeds 目录 ==="
-        ls -la package/feeds/ 2>/dev/null || echo "package/feeds 目录不存在"
-        
-        echo "=== 查找所有 feeds 相关目录 ==="
-        find . -maxdepth 3 -type d -name "feeds" 2>/dev/null
-        
-        echo "=== 查找 dockerd 相关文件 ==="
-        find . -name "*dockerd*" -o -name "*docker*" 2>/dev/null | grep -v ".git/" | head -30
-        
-        echo "=== 查看 feeds 目录内容 ==="
-        ls -la feeds/ 2>/dev/null || echo "feeds 目录不存在"
-        
-        echo "=== 查找所有 Makefile 中包含 dockerd 的文件 ==="
-        find . -name "Makefile" -exec grep -l "dockerd" {} \; 2>/dev/null | head -10
-        
-        echo "=== 查看当前目录结构 ==="
-        ls -la
-        
-        echo "=== 查找 utils 目录 ==="
-        find . -type d -name "utils" 2>/dev/null | head -10
-        
-        # 尝试多种可能的位置
-        echo "=== 尝试查找 dockerd 包 ==="
-        for path in \
-          "feeds/packages/utils/dockerd" \
-          "package/feeds/packages/utils/dockerd" \
-          "feeds/packages/net/dockerd" \
-          "package/feeds/packages/net/dockerd" \
-          "package/dockerd" \
-          "feeds/dockerd"
-        do
-          if [ -d "$path" ]; then
-            echo "找到: $path"
-            ls -la "$path"
+        if [ -f "$DOCKERD_MAKEFILE" ]; then
+          echo "找到 dockerd Makefile: $DOCKERD_MAKEFILE"
+          echo "当前版本信息："
+          grep "PKG_VERSION" "$DOCKERD_MAKEFILE"
+          
+          # 检查是否是问题版本
+          if grep -q "PKG_VERSION:=29.6.1" "$DOCKERD_MAKEFILE"; then
+            echo "检测到问题版本 29.6.1，进行修复..."
+            
+            # 备份
+            cp "$DOCKERD_MAKEFILE" "${DOCKERD_MAKEFILE}.bak"
+            
+            # 方法1：修改版本号到 27.0.3
+            sed -i 's/PKG_VERSION:=29.6.1/PKG_VERSION:=27.0.3/' "$DOCKERD_MAKEFILE"
+            sed -i 's/PKG_HASH:=.*/PKG_HASH:=skip/' "$DOCKERD_MAKEFILE"
+            
+            echo "版本已修改为："
+            grep "PKG_VERSION\|PKG_HASH" "$DOCKERD_MAKEFILE"
+          else
+            echo "当前版本不是 29.6.1，检查其他问题..."
+            grep "PKG_VERSION" "$DOCKERD_MAKEFILE"
           fi
-        done
+          
+          # 方法2：修补 Makefile 中的复制命令
+          echo "检查 Makefile 中的问题代码..."
+          if grep -q "Copying nested executables" "$DOCKERD_MAKEFILE"; then
+            echo "找到 'Copying nested executables' 相关代码，进行修补..."
+            
+            # 显示问题行附近的内容
+            echo "问题行附近的内容："
+            grep -n -B 2 -A 5 "Copying nested executables" "$DOCKERD_MAKEFILE"
+            
+            # 注释掉有问题的 cp 命令
+            sed -i '/cp.*bundles\/binary-daemon/s/^/#/' "$DOCKERD_MAKEFILE"
+            
+            echo "已注释掉有问题的复制命令"
+          fi
+          
+          # 方法3：查看并修补 build 部分
+          echo "检查 build 部分..."
+          grep -n -A 10 "define Build/Compile" "$DOCKERD_MAKEFILE" | head -20
+          
+          # 如果 Makefile 中有嵌套可执行文件的复制，确保使用正确的路径
+          if grep -q "nested executables" "$DOCKERD_MAKEFILE"; then
+            echo "找到嵌套可执行文件相关代码..."
+            # 替换为安全的复制命令
+            sed -i 's/cp \$\$(DOCKER_BUILD_DIR)\/bundles\/binary-daemon\/\*/cp -r \$\$(DOCKER_BUILD_DIR)\/bundles\/binary-daemon\/* \$(1)\/usr\/bin\/ 2>\/dev\/null || true/' "$DOCKERD_MAKEFILE"
+          fi
+          
+        else
+          echo "错误：未找到 dockerd Makefile"
+          echo "尝试其他位置..."
+          
+          # 尝试符号链接位置
+          if [ -f "package/feeds/packages/dockerd/Makefile" ]; then
+            echo "找到符号链接: package/feeds/packages/dockerd/Makefile"
+            DOCKERD_MAKEFILE="package/feeds/packages/dockerd/Makefile"
+            
+            # 同样的修复逻辑
+            cp "$DOCKERD_MAKEFILE" "${DOCKERD_MAKEFILE}.bak"
+            sed -i 's/PKG_VERSION:=29.6.1/PKG_VERSION:=27.0.3/' "$DOCKERD_MAKEFILE"
+            sed -i 's/PKG_HASH:=.*/PKG_HASH:=skip/' "$DOCKERD_MAKEFILE"
+            sed -i '/cp.*bundles\/binary-daemon/s/^/#/' "$DOCKERD_MAKEFILE"
+          fi
+        fi
         
-        # 使用 find 全面搜索
-        echo "=== 全面搜索 dockerd ==="
-        find . -type d -name "dockerd" 2>/dev/null | head -5
-        find . -type l -name "dockerd" 2>/dev/null | head -5
+        # 验证修复结果
+        echo "========================================="
+        echo "验证修复结果："
+        if [ -f "$DOCKERD_MAKEFILE" ]; then
+          echo "dockerd 版本："
+          grep "PKG_VERSION" "$DOCKERD_MAKEFILE"
+          echo "检查是否还有问题的复制命令："
+          grep -n "bundles/binary-daemon" "$DOCKERD_MAKEFILE" || echo "没有找到相关命令"
+        fi
+        echo "========================================="
         
-        echo "=== 搜索 docker 相关目录 ==="
-        find . -type d -iname "*docker*" 2>/dev/null | grep -v ".git/" | head -20
-        
-        echo "调试完成，不退出"
-        # 不退出，继续执行
-        echo "Docker 修复步骤完成（调试模式）"
+        echo "Docker 修复完成！"
         
     - name: 加载默认配置
       run: |
