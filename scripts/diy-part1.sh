@@ -14,6 +14,8 @@ function merge_package(){
 rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf feeds/luci/applications/luci-app-argon-config
 rm -rf feeds/luci/applications/luci-app-dockerman
+rm -rf feeds/packages/utils/dockerd
+rm -rf feeds/packages/utils/docker
 
 # Clone community packages to package/community
 mkdir -p package/community
@@ -40,6 +42,7 @@ git clone https://github.com/xiaorouji/openwrt-passwall-packages package/openwrt
 git clone https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
 # 添加 Dockerman
 git clone https://github.com/lisaac/luci-app-dockerman package/luci-app-dockerman
+git clone https://github.com/sbwml/openwrt-docker package/openwrt-docker
 popd
 
 # add luci-app-mosdns
