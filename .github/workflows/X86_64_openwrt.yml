@@ -14,6 +14,7 @@ env:
   DIY_P2_SH: scripts/diy-part2.sh
   THEME_SETTING_SH: scripts/theme-setting.sh
   PRESET_CLASH_SH: scripts/preset-clash-core.sh
+  ISTORE_SH: scripts/istore.sh
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
@@ -99,13 +100,14 @@ jobs:
         $GITHUB_WORKSPACE/$DIY_P1_SH
         $GITHUB_WORKSPACE/$THEME_SETTING_SH
         $GITHUB_WORKSPACE/$PRESET_CLASH_SH
+        $GITHUB_WORKSPACE/$ISTORE_SH
         
     - name: 加载自定义配置
       run: |
         [ -e "$CONFIG_FILE" ] && cat "$CONFIG_FILE" > openwrt/.config
         chmod +x $OPENWRT_NAME/*.sh && cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
-
+        
     - name: 下载安装包
       id: package
       run: |
