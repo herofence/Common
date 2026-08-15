@@ -37,7 +37,7 @@ git clone --depth=1 https://github.com/esirplayground/luci-app-poweroff package/
 git clone --depth=1 https://github.com/Jason6111/luci-app-netdata package/luci-app-netdata
 git clone --depth=1 https://github.com/vernesong/OpenClash.git package/luci-app-openclash
 git clone https://github.com/xiaorouji/openwrt-passwall-packages package/openwrt-passwall
-git clone https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwal
+git clone https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
 # 添加 Dockerman
 git clone https://github.com/lisaac/luci-app-dockerman package/luci-app-dockerman
 popd
