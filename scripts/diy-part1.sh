@@ -4,18 +4,19 @@
 function merge_package(){
     repo=`echo $1 | rev | cut -d'/' -f 1 | rev`
     pkg=`echo $2 | rev | cut -d'/' -f 1 | rev`
-    # find package/ -follow -name $pkg -not -path "package/openwrt-packages/*" | xargs -rt rm -rf
     git clone --depth=1 --single-branch $1
     [ -d package/openwrt-packages ] || mkdir -p package/openwrt-packages
     mv $2 package/openwrt-packages/
     rm -rf $repo
 }
 
+# 清理冲突的主题和应用
 rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf feeds/luci/applications/luci-app-argon-config
+rm -rf feeds/luci/applications/luci-app-dockerman
 
 # Clone community packages to package/community
-mkdir package/community
+mkdir -p package/community
 pushd package/community
 git clone https://github.com/jerrykuku/luci-theme-argon package/luci-theme-argon
 git clone --depth=1 https://github.com/jerrykuku/luci-app-argon-config package/luci-app-argon-config
@@ -38,6 +39,8 @@ git clone --depth=1 https://github.com/Jason6111/luci-app-netdata package/luci-a
 git clone --depth=1 https://github.com/vernesong/OpenClash.git package/luci-app-openclash
 git clone https://github.com/xiaorouji/openwrt-passwall-packages package/openwrt-passwall
 git clone https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwal
+# 添加 Dockerman
+git clone https://github.com/lisaac/luci-app-dockerman package/luci-app-dockerman
 popd
 
 # add luci-app-mosdns
