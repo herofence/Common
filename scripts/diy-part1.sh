@@ -14,6 +14,7 @@ function merge_package(){
 rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf feeds/luci/applications/luci-app-argon-config
 rm -rf feeds/luci/applications/luci-app-dockerman
+rm -rf feeds/packages/utils/dockerd
 
 # Clone community packages to package/community
 mkdir -p package/community
@@ -32,11 +33,12 @@ git clone --depth=1 -b openwrt-18.06 https://github.com/tty228/luci-app-wechatpu
 git clone --depth=1 https://github.com/ilxp/luci-app-ikoolproxy package/luci-app-ikoolproxy
 git clone --depth=1 https://github.com/esirplayground/luci-app-poweroff package/luci-app-poweroff
 git clone --depth=1 https://github.com/Jason6111/luci-app-netdata package/luci-app-netdata
-git clone --depth=1 https://github.com/vernesong/OpenClash.git package/luci-app-openclash
+git clone --depth=1 https://github.com/vernesong/OpenClash.git package/openclash 2>/dev/null || true
 git clone https://github.com/xiaorouji/openwrt-passwall-packages package/openwrt-passwall
 git clone https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
 # 添加 Dockerman
 git clone https://github.com/lisaac/luci-app-dockerman package/luci-app-dockerman
+git clone --depth=1 https://github.com/immortalwrt/packages/tree/openwrt-23.05/utils/dockerd package/dockerd-fix 2>/dev/null || true
 popd
 
 # add luci-app-mosdns
@@ -78,17 +80,24 @@ fi
 # 取消主题默认设置
 find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \; 2>/dev/null
 
-# 修复 dockerd 编译时 cp: cannot stat '' 报错
-DOCKERD_MAKE="feeds/packages/utils/dockerd/Makefile"
-if [ -f "$DOCKERD_MAKE" ]; then
-    # 替换或补全 Makefile 中传给 dockerd 构建系统的路径变量
-    sed -i 's/DOCKER_CONTAINERD:=.*/DOCKER_CONTAINERD:=\/usr\/bin\/containerd/g' "$DOCKERD_MAKE" 2>/dev/null || true
-    sed -i 's/DOCKER_RUNC:=.*/DOCKER_RUNC:=\/usr\/bin\/runc/g' "$DOCKERD_MAKE" 2>/dev/null || true
-    sed -i 's/DOCKER_PROXY:=.*/DOCKER_PROXY:=\/usr\/bin\/docker-proxy/g' "$DOCKERD_MAKE" 2>/dev/null || true
-    sed -i 's/DOCKER_INIT:=.*/DOCKER_INIT:=\/usr\/bin\/tini/g' "$DOCKERD_MAKE" 2>/dev/null || true
+# 修复 dockerd 编译时 cp: cannot stat '' 的严重错误
+DOCKERD_MAKEFILE="feeds/packages/utils/dockerd/Makefile"
+
+if [ -f "$DOCKERD_MAKEFILE" ]; then
+    echo "Fixing dockerd Makefile variables..."
     
-    # 彻底防止 cp 命令找不到文件时直接中断整个编译
-    sed -i 's/cp -L/cp -Lf/g' "$DOCKERD_MAKE" 2>/dev/null || true
+    # 1. 给 Makefile 中定义为空或缺失的变量强制赋默认值
+    sed -i '/CONTAINERD_PATH:=/c\CONTAINERD_PATH:=\/usr\/bin\/containerd' "$DOCKERD_MAKEFILE"
+    sed -i '/RUNC_PATH:=/c\RUNC_PATH:=\/usr\/bin\/runc' "$DOCKERD_MAKEFILE"
+    sed -i '/DOCKER_PROXY_PATH:=/c\DOCKER_PROXY_PATH:=\/usr\/bin\/docker-proxy' "$DOCKERD_MAKEFILE"
+    sed -i '/TINI_PATH:=/c\TINI_PATH:=\/usr\/bin\/tini' "$DOCKERD_MAKEFILE"
+
+    # 2. 修改 Makefile 中的 cp 命令，给所有 cp 操作增加容错（忽略找不到空路径的报错）
+    sed -i 's/cp -L /cp -Lf /g' "$DOCKERD_MAKEFILE"
+    sed -i 's/cp -a /cp -af /g' "$DOCKERD_MAKEFILE"
+    
+    # 3. 拦截 dockerd 源码里的 hack/make/binary-daemon 构建脚本，把 cp 空变量替换为安全判断
+    sed -i 's/cp "${/cp -f "${/g' "$DOCKERD_MAKEFILE" 2>/dev/null || true
 fi
 
 # 修正部分从第三方仓库拉取的软件 Makefile 路径问题
