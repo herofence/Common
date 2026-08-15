@@ -34,9 +34,6 @@ git clone --depth=1 https://github.com/Jason6111/luci-app-netdata package/luci-a
 git clone --depth=1 https://github.com/vernesong/OpenClash.git package/openclash 2>/dev/null || true
 git clone https://github.com/xiaorouji/openwrt-passwall-packages package/openwrt-passwall
 git clone https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
-# 添加 Dockerman
-git clone https://github.com/lisaac/luci-app-dockerman package/luci-app-dockerman
-git clone --depth=1 https://github.com/immortalwrt/packages/tree/openwrt-23.05/utils/dockerd package/dockerd-fix 2>/dev/null || true
 popd
 
 # add luci-app-mosdns
