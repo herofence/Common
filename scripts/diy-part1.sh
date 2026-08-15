@@ -81,6 +81,14 @@ fi
 # 取消主题默认设置
 find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \; 2>/dev/null
 
+# 修复 dockerd 编译时 cp 命令因空变量报错的问题
+DOCKERD_MAKEFILE="feeds/packages/utils/dockerd/Makefile"
+if [ -f "$DOCKERD_MAKEFILE" ]; then
+    # 强制将可能为空的复制命令加上容错判断
+    sed -i 's/cp -f $(CONTAINERD_PATH)/[ -f "$(CONTAINERD_PATH)" ] \&\& cp -f $(CONTAINERD_PATH)/g' "$DOCKERD_MAKEFILE" 2>/dev/null || true
+    sed -i 's/cp -f $(RUNC_PATH)/[ -f "$(RUNC_PATH)" ] \&\& cp -f $(RUNC_PATH)/g' "$DOCKERD_MAKEFILE" 2>/dev/null || true
+fi
+
 # 修正部分从第三方仓库拉取的软件 Makefile 路径问题
 find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/..\/..\/luci.mk/$(TOPDIR)\/feeds\/luci\/luci.mk/g' {} 2>/dev/null
 find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/..\/..\/lang\/golang\/golang-package.mk/$(TOPDIR)\/feeds\/packages\/lang\/golang\/golang-package.mk/g' {} 2>/dev/null
