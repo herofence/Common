@@ -35,6 +35,8 @@ git clone --depth=1 https://github.com/vernesong/OpenClash.git package/openclash
 git clone https://github.com/xiaorouji/openwrt-passwall-packages package/openwrt-passwall
 git clone https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
 git clone --depth=1 https://github.com/linkease/istore package/istore
+./scripts/feeds update istore
+./scripts/feeds install -d y -p istore luci-app-store
 git clone --depth=1 https://github.com/linkease/nas-packages package/nas-packages
 git clone --depth=1 https://github.com/linkease/nas-packages-luci package/nas-packages-luci
 popd
