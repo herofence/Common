@@ -14,8 +14,6 @@ function merge_package(){
 rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf feeds/luci/applications/luci-app-argon-config
 rm -rf feeds/luci/applications/luci-app-dockerman
-rm -rf feeds/packages/utils/dockerd
-rm -rf feeds/packages/utils/docker
 
 # Clone community packages to package/community
 mkdir -p package/community
@@ -42,7 +40,6 @@ git clone https://github.com/xiaorouji/openwrt-passwall-packages package/openwrt
 git clone https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
 # 添加 Dockerman
 git clone https://github.com/lisaac/luci-app-dockerman package/luci-app-dockerman
-git clone https://github.com/sbwml/openwrt-docker package/openwrt-docker
 popd
 
 # add luci-app-mosdns
@@ -84,14 +81,17 @@ fi
 # 取消主题默认设置
 find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \; 2>/dev/null
 
-# 修复 dockerd 编译时因 cp 源路径为空导致的报错
-DOCKERD_MAKEFILE="feeds/packages/utils/dockerd/Makefile"
-if [ -f "$DOCKERD_MAKEFILE" ]; then
-    # 强制在 Make Exec 阶段传入默认路径参数
-    sed -i '/MAKE_PATH/a \  DOCKER_CONTAINERD=/usr/bin/containerd \\\n  DOCKER_RUNC=/usr/bin/runc \\\n  DOCKER_PROXY=/usr/bin/docker-proxy \\\n  DOCKER_INIT=/usr/bin/tini \\' "$DOCKERD_MAKEFILE"
+# 修复 dockerd 编译时 cp: cannot stat '' 报错
+DOCKERD_MAKE="feeds/packages/utils/dockerd/Makefile"
+if [ -f "$DOCKERD_MAKE" ]; then
+    # 替换或补全 Makefile 中传给 dockerd 构建系统的路径变量
+    sed -i 's/DOCKER_CONTAINERD:=.*/DOCKER_CONTAINERD:=\/usr\/bin\/containerd/g' "$DOCKERD_MAKE" 2>/dev/null || true
+    sed -i 's/DOCKER_RUNC:=.*/DOCKER_RUNC:=\/usr\/bin\/runc/g' "$DOCKERD_MAKE" 2>/dev/null || true
+    sed -i 's/DOCKER_PROXY:=.*/DOCKER_PROXY:=\/usr\/bin\/docker-proxy/g' "$DOCKERD_MAKE" 2>/dev/null || true
+    sed -i 's/DOCKER_INIT:=.*/DOCKER_INIT:=\/usr\/bin\/tini/g' "$DOCKERD_MAKE" 2>/dev/null || true
     
-    # 规避复制失败，对 cp 命令增加容错保护
-    find build_dir/ -name "binary-daemon" -exec sed -i 's/cp -L /cp -Lf /g' {} + 2>/dev/null || true
+    # 彻底防止 cp 命令找不到文件时直接中断整个编译
+    sed -i 's/cp -L/cp -Lf/g' "$DOCKERD_MAKE" 2>/dev/null || true
 fi
 
 # 修正部分从第三方仓库拉取的软件 Makefile 路径问题
