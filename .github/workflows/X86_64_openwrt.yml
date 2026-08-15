@@ -75,10 +75,10 @@ jobs:
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
         cd openwrt
         echo >> feeds.conf.default
-        echo 'src-git istore https://github.com/linkease/istore;main' >> feeds.conf.default
-        echo 'src-git nas https://github.com/linkease/nas-packages.git;master' >> feeds.conf.default
-        echo 'src-git nas_luci https://github.com/linkease/nas-packages-luci.git;main' >> feeds.conf.default
-        echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
+         echo 'src-git istore https://github.com/linkease/istore;main' >> feeds.conf.default
+         echo 'src-git nas https://github.com/linkease/nas-packages.git;master' >> feeds.conf.default
+         echo 'src-git nas_luci https://github.com/linkease/nas-packages-luci.git;main' >> feeds.conf.default
+         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
         # 获取源码提交信息
         COMMIT_AUTHOR=$(git show -s --date=short --format="作者: %an" 2>/dev/null || echo "作者: 未知")
         echo "COMMIT_AUTHOR=$COMMIT_AUTHOR" >> $GITHUB_ENV
@@ -93,6 +93,9 @@ jobs:
       working-directory: ./openwrt
       run: |
         ./scripts/feeds update -a
+        ./scripts/feeds install -a -p nas
+        ./scripts/feeds install -a -p nas_luci
+        ./scripts/feeds install -d y -p istore luci-app-store
         ./scripts/feeds install -a
                 
     - name: 加载默认配置
