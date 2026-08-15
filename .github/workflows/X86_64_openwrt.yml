@@ -3,12 +3,13 @@ name: immortalwrt_x86_64
 on:
   workflow_dispatch:
   schedule:
-  # 每周五 3:00执行一次
+  # 每周五 3:00执行一次 (注意: GitHub Actions 时间可能有延迟, 且 cron 使用 UTC 时间, 19:00 UTC 是北京时间次日 03:00)
    - cron: 0 19 * * THU
 
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
-  REPO_BRANCH: master
+  # 使用稳定的 24.10 分支，避免 master 分支的剧烈变动
+  REPO_BRANCH: openwrt-24.10
   CONFIG_FILE: configs/openwrt.config
   DIY_P1_SH: scripts/diy-part1.sh
   DIY_P2_SH: scripts/diy-part2.sh
@@ -55,13 +56,13 @@ jobs:
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-        ( sudo -E apt-get -qq update
+        sudo -E apt-get -qq update
         sudo -E apt-get -qq install build-essential clang flex g++ gawk gcc-multilib gettext \
         git libncurses5-dev libssl-dev python3-distutils rsync unzip zlib1g-dev swig libpython3-dev aria2 jq subversion qemu-utils ccache rename libelf-dev
         sudo -E apt-get -qq purge azure-cli ghc* zulu* hhvm llvm* firefox powershell openjdk* dotnet* google* mysql* php* android* rename speedtest-cli
         sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
         sudo -E apt-get -qq autoremove --purge
-        sudo -E apt-get -qq clean ) &
+        sudo -E apt-get -qq clean
         sudo timedatectl set-timezone "$TZ"
         
     - name: 系统信息
@@ -114,6 +115,7 @@ jobs:
       id: package
       run: |
         cd openwrt
+        # 强制启用 Docker 相关配置
         echo '
         CONFIG_DOCKER_CGROUP_OPTIONS=y
         CONFIG_DOCKER_NET_MACVLAN=y
@@ -135,10 +137,18 @@ jobs:
       run: |
         cd openwrt
         echo -e "$(nproc) thread compile"
-        make -j$(nproc) || make -j1 || make -j1 V=s
+        
+        # 策略：先尝试多线程编译。如果失败，则停止并报错，以便我们查看日志。
+        # 不再使用 || make -j1 V=s 这种掩盖错误的方式，除非你确实想让它强行跑完忽略错误（不推荐用于排查）
+        # 如果 dockerd 依然报错，这里的日志会清晰显示是哪个步骤 cp 失败
+        
+        make -j$(nproc) 
+        
+        # 如果上面成功了，才执行以下信息提取
         echo "date1=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
         echo "date2=$(date "+%Y年%m月%d日")" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
+        
         # 获取内核版本
         KERNEL_VER=$(cat bin/targets/x86/64/*.manifest | grep ^kernel | head -1 | cut -d- -f2 | tr -d ' ' 2>/dev/null || echo "未知")
         echo "KERNEL_VER=$KERNEL_VER" >> $GITHUB_ENV
