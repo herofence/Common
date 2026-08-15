@@ -75,26 +75,6 @@ fi
 # 取消主题默认设置
 find package/luci-theme-*/* -type f -name '*luci-theme-*' -print -exec sed -i '/set luci.main.mediaurlbase/d' {} \; 2>/dev/null
 
-# 修复 dockerd 编译时 cp: cannot stat '' 的严重错误
-DOCKERD_MAKEFILE="feeds/packages/utils/dockerd/Makefile"
-
-if [ -f "$DOCKERD_MAKEFILE" ]; then
-    echo "Fixing dockerd Makefile variables..."
-    
-    # 1. 给 Makefile 中定义为空或缺失的变量强制赋默认值
-    sed -i '/CONTAINERD_PATH:=/c\CONTAINERD_PATH:=\/usr\/bin\/containerd' "$DOCKERD_MAKEFILE"
-    sed -i '/RUNC_PATH:=/c\RUNC_PATH:=\/usr\/bin\/runc' "$DOCKERD_MAKEFILE"
-    sed -i '/DOCKER_PROXY_PATH:=/c\DOCKER_PROXY_PATH:=\/usr\/bin\/docker-proxy' "$DOCKERD_MAKEFILE"
-    sed -i '/TINI_PATH:=/c\TINI_PATH:=\/usr\/bin\/tini' "$DOCKERD_MAKEFILE"
-
-    # 2. 修改 Makefile 中的 cp 命令，给所有 cp 操作增加容错（忽略找不到空路径的报错）
-    sed -i 's/cp -L /cp -Lf /g' "$DOCKERD_MAKEFILE"
-    sed -i 's/cp -a /cp -af /g' "$DOCKERD_MAKEFILE"
-    
-    # 3. 拦截 dockerd 源码里的 hack/make/binary-daemon 构建脚本，把 cp 空变量替换为安全判断
-    sed -i 's/cp "${/cp -f "${/g' "$DOCKERD_MAKEFILE" 2>/dev/null || true
-fi
-
 # 修正部分从第三方仓库拉取的软件 Makefile 路径问题
 find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/..\/..\/luci.mk/$(TOPDIR)\/feeds\/luci\/luci.mk/g' {} 2>/dev/null
 find package/*/ -maxdepth 2 -path "*/Makefile" | xargs -i sed -i 's/..\/..\/lang\/golang\/golang-package.mk/$(TOPDIR)\/feeds\/packages\/lang\/golang\/golang-package.mk/g' {} 2>/dev/null
