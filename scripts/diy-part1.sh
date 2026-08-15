@@ -34,6 +34,9 @@ git clone --depth=1 https://github.com/Jason6111/luci-app-netdata package/luci-a
 git clone --depth=1 https://github.com/vernesong/OpenClash.git package/openclash 2>/dev/null || true
 git clone https://github.com/xiaorouji/openwrt-passwall-packages package/openwrt-passwall
 git clone https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
+git clone --depth=1 https://github.com/linkease/istore package/istore
+git clone --depth=1 https://github.com/linkease/nas-packages package/nas-packages
+git clone --depth=1 https://github.com/linkease/nas-packages-luci package/nas-packages-luci
 popd
 
 # add luci-app-mosdns
