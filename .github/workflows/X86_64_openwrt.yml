@@ -14,7 +14,6 @@ env:
   DIY_P2_SH: scripts/diy-part2.sh
   THEME_SETTING_SH: scripts/theme-setting.sh
   PRESET_CLASH_SH: scripts/preset-clash-core.sh
-  ISTORE_SH: scripts/istore.sh
   UPLOAD_FIRMWARE: true
   UPLOAD_RELEASE: true
   TZ: Asia/Shanghai
@@ -76,6 +75,10 @@ jobs:
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
         cd openwrt
+        echo >> feeds.conf.default
+        echo 'src-git istore https://github.com/linkease/istore;main' >> feeds.conf.default
+        echo 'src-git nas https://github.com/linkease/nas-packages.git;master' >> feeds.conf.default
+        echo 'src-git nas_luci https://github.com/linkease/nas-packages-luci.git;main' >> feeds.conf.default
         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
         # 获取源码提交信息
         COMMIT_AUTHOR=$(git show -s --date=short --format="作者: %an" 2>/dev/null || echo "作者: 未知")
@@ -100,7 +103,6 @@ jobs:
         $GITHUB_WORKSPACE/$DIY_P1_SH
         $GITHUB_WORKSPACE/$THEME_SETTING_SH
         $GITHUB_WORKSPACE/$PRESET_CLASH_SH
-        $GITHUB_WORKSPACE/$ISTORE_SH
         
     - name: 加载自定义配置
       run: |
