@@ -25,9 +25,6 @@ git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns package/
 git clone --depth=1 https://github.com/pymumu/openwrt-smartdns package/smartdns
 git clone https://github.com/lisaac/luci-app-diskman package/applications/luci-app-diskman
 git clone https://github.com/gdy666/luci-app-lucky.git package/lucky
-git clone --depth=1 https://github.com/linkease/istore package/istore
-git clone --depth=1 https://github.com/linkease/nas-packages package/nas-packages
-git clone --depth=1 https://github.com/linkease/nas-packages-luci package/nas-packages-luci
 git clone https://github.com/sirpdboy/netspeedtest.git package/netspeedtest
 git clone https://github.com/lmq8267/luci-app-vnt.git package/vnt
 git clone --depth=1 https://github.com/EasyTier/luci-app-easytier package/luci-app-easytier
