@@ -1,4 +1,8 @@
 #!/bin/bash
+# 设置 Git 使用 token 认证（如果存在）
+if [ -n "${GITHUB_TOKEN}" ]; then
+    git config --global url."https://oauth2:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
+fi
 
 # Merge_package
 function merge_package(){
@@ -20,7 +24,7 @@ rm -rf feeds/packages/net/v2ray-geodata
 mkdir -p package/community
 pushd package/community
 git clone --depth=1 https://github.com/jerrykuku/luci-theme-argon
-git clone --depth=1 https://github.com/jerrykuku/luci-app-argon-confi
+git clone --depth=1 https://github.com/jerrykuku/luci-app-argon-config
 git clone --depth=1 https://github.com/y9858/luci-theme-opentomca
 git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns
 git clone --depth=1 https://github.com/lisaac/luci-app-diskman
