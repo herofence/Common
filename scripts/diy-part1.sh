@@ -25,7 +25,7 @@ mkdir -p package/community
 pushd package/community
 git clone --depth=1 https://github.com/jerrykuku/luci-theme-argon
 git clone --depth=1 https://github.com/jerrykuku/luci-app-argon-config
-git clone --depth=1 https://github.com/y9858/luci-theme-opentomca
+git clone --depth=1 https://github.com/y9858/luci-theme-opentomcat
 git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns
 git clone --depth=1 https://github.com/lisaac/luci-app-diskman
 git clone --depth=1 https://github.com/gdy666/luci-app-lucky
