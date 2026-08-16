@@ -15,7 +15,7 @@ rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf feeds/luci/applications/luci-app-argon-config
 rm -rf feeds/luci/applications/luci-app-mosdns
 
-# Clone community packages to package/community
+# 克隆插件包到 package/目录
 mkdir -p package/community
 pushd package/community
 git clone --depth=1 https://github.com/jerrykuku/luci-theme-argon
