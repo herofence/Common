@@ -17,23 +17,23 @@ rm -rf feeds/luci/applications/luci-app-argon-config
 # Clone community packages to package/community
 mkdir -p package/community
 pushd package/community
-git clone https://github.com/jerrykuku/luci-theme-argon package/luci-theme-argon
-git clone --depth=1 https://github.com/jerrykuku/luci-app-argon-config package/luci-app-argon-config
-git clone https://github.com/y9858/luci-theme-opentomcat package/luci-theme-opentomcat
-git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns package/luci-app-smartdns
-git clone --depth=1 https://github.com/pymumu/openwrt-smartdns package/smartdns
-git clone https://github.com/lisaac/luci-app-diskman package/applications/luci-app-diskman
-git clone https://github.com/gdy666/luci-app-lucky.git package/lucky
-git clone https://github.com/sirpdboy/netspeedtest.git package/netspeedtest
-git clone https://github.com/lmq8267/luci-app-vnt.git package/vnt
-git clone --depth=1 https://github.com/EasyTier/luci-app-easytier package/luci-app-easytier
-git clone --depth=1 -b openwrt-18.06 https://github.com/tty228/luci-app-wechatpush package/luci-app-serverchan
-git clone --depth=1 https://github.com/ilxp/luci-app-ikoolproxy package/luci-app-ikoolproxy
-git clone --depth=1 https://github.com/esirplayground/luci-app-poweroff package/luci-app-poweroff
-git clone --depth=1 https://github.com/Jason6111/luci-app-netdata package/luci-app-netdata
-git clone --depth=1 https://github.com/vernesong/OpenClash.git package/openclash 2>/dev/null || true
-git clone https://github.com/xiaorouji/openwrt-passwall-packages package/openwrt-passwall
-git clone https://github.com/xiaorouji/openwrt-passwall package/luci-app-passwall
+git clone --depth=1 https://github.com/jerrykuku/luci-theme-argon
+git clone --depth=1 https://github.com/jerrykuku/luci-app-argon-confi
+git clone --depth=1 https://github.com/y9858/luci-theme-opentomca
+git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns
+git clone --depth=1 https://github.com/pymumu/openwrt-smartdns
+git clone --depth=1 https://github.com/lisaac/luci-app-diskman
+git clone --depth=1 https://github.com/gdy666/luci-app-lucky
+git clone --depth=1 https://github.com/sirpdboy/netspeedtest
+git clone --depth=1 https://github.com/lmq8267/luci-app-vnt
+git clone --depth=1 https://github.com/EasyTier/luci-app-easytier
+git clone --depth=1 -b openwrt-18.06 https://github.com/tty228/luci-app-wechatpush
+git clone --depth=1 https://github.com/ilxp/luci-app-ikoolproxy
+git clone --depth=1 https://github.com/esirplayground/luci-app-poweroff
+git clone --depth=1 https://github.com/Jason6111/luci-app-netdata
+git clone --depth=1 https://github.com/vernesong/OpenClash
+git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall-packages
+git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall
 popd
 
 # add luci-app-mosdns
