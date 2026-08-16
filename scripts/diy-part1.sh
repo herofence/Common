@@ -13,6 +13,7 @@ function merge_package(){
 # 清理冲突的主题和应用
 rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf feeds/luci/applications/luci-app-argon-config
+rm -rf feeds/luci/applications/luci-app-mosdns
 
 # Clone community packages to package/community
 mkdir -p package/community
