@@ -93,8 +93,8 @@ jobs:
       run: |
         ./scripts/feeds update -a
         #修复 dockerd 编译问题
-        # curl -fsSL https://raw.githubusercontent.com/openwrt/packages/master/utils/dockerd/Makefile -o feeds/packages/utils/dockerd/Makefile
-        # curl -fsSL https://raw.githubusercontent.com/openwrt/packages/master/utils/containerd/Makefile -o feeds/packages/utils/containerd/Makefile
+        curl -fsSL https://raw.githubusercontent.com/openwrt/packages/-24.10/utils/dockerd/Makefile -o feeds/packages/utils/dockerd/Makefile
+        curl -fsSL https://raw.githubusercontent.com/openwrt/packages/-24.10/utils/containerd/Makefile -o feeds/packages/utils/containerd/Makefile
         echo >> feeds.conf.default
         ./scripts/feeds install -a -p nas
         ./scripts/feeds install -a -p nas_luci
