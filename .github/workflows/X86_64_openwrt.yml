@@ -74,9 +74,6 @@ jobs:
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
         cd openwrt
-        #修复 dockerd 编译问题
-        curl -fsSL https://raw.githubusercontent.com/openwrt/packages/master/utils/dockerd/Makefile -o feeds/packages/utils/dockerd/Makefile
-        echo >> feeds.conf.default
          echo 'src-git istore https://github.com/linkease/istore;main' >> feeds.conf.default
          echo 'src-git nas https://github.com/linkease/nas-packages.git;master' >> feeds.conf.default
          echo 'src-git nas_luci https://github.com/linkease/nas-packages-luci.git;main' >> feeds.conf.default
@@ -95,6 +92,9 @@ jobs:
       working-directory: ./openwrt
       run: |
         ./scripts/feeds update -a
+        #修复 dockerd 编译问题
+        curl -fsSL https://raw.githubusercontent.com/openwrt/packages/master/utils/dockerd/Makefile -o feeds/packages/utils/dockerd/Makefile
+        echo >> feeds.conf.default
         ./scripts/feeds install -a -p nas
         ./scripts/feeds install -a -p nas_luci
         ./scripts/feeds install -d y -p istore luci-app-store
