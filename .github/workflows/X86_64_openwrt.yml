@@ -138,14 +138,7 @@ jobs:
       run: |
         cd openwrt
         echo -e "$(nproc) thread compile"
-        
-        # 策略：先尝试多线程编译。如果失败，则停止并报错，以便我们查看日志。
-        # 不再使用 || make -j1 V=s 这种掩盖错误的方式，除非你确实想让它强行跑完忽略错误（不推荐用于排查）
-        # 如果 dockerd 依然报错，这里的日志会清晰显示是哪个步骤 cp 失败
-        
-        make -j$(nproc) 
-        
-        # 如果上面成功了，才执行以下信息提取
+        make -j1 V=s 
         echo "date1=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
         echo "date2=$(date "+%Y年%m月%d日")" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
