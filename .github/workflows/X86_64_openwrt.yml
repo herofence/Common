@@ -105,6 +105,8 @@ jobs:
         $GITHUB_WORKSPACE/$DIY_P1_SH
         $GITHUB_WORKSPACE/$THEME_SETTING_SH
         $GITHUB_WORKSPACE/$PRESET_CLASH_SH
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         
     - name: 加载自定义配置
       run: |
