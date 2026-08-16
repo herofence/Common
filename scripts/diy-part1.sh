@@ -16,7 +16,7 @@ rm -rf feeds/luci/applications/luci-app-argon-config
 rm -rf feeds/luci/applications/luci-app-mosdns
 rm -rf feeds/packages/net/v2ray-geodata
 
-# 克隆插件包到 package/目录
+# 克隆插件包到 package目录
 mkdir -p package/community
 pushd package/community
 git clone --depth=1 https://github.com/jerrykuku/luci-theme-argon
