@@ -74,6 +74,8 @@ jobs:
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
         cd openwrt
+        #修复 dockerd 编译问题
+        curl -fsSL https://raw.githubusercontent.com/openwrt/packages/master/utils/dockerd/Makefile -o feeds/packages/utils/dockerd/Makefile
         echo >> feeds.conf.default
          echo 'src-git istore https://github.com/linkease/istore;main' >> feeds.conf.default
          echo 'src-git nas https://github.com/linkease/nas-packages.git;master' >> feeds.conf.default
