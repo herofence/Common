@@ -17,7 +17,6 @@ function merge_package(){
 # 清理冲突的主题和应用
 rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf feeds/luci/applications/luci-app-argon-config
-rm -rf feeds/luci/applications/luci-app-mosdns
 rm -rf feeds/packages/net/v2ray-geodata
 
 # 克隆插件包到 package目录
@@ -40,10 +39,8 @@ git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall-packages
 popd
 
 # 克隆其它仓库
-git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 git clone --depth=1 https://github.com/vernesong/OpenClash.git package/luci-app-openclash
 git clone --depth=1 https://github.com/pymumu/openwrt-smartdns package/smartdns
-git clone --depth=1 https://github.com/Siriling/5G-Modem-Support && rm -rf 5G-Modem-Support/rooter
 
 # 更改默认主题
 if [ -f "./feeds/luci/collections/luci/Makefile" ]; then
