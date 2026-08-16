@@ -14,6 +14,7 @@ function merge_package(){
 rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf feeds/luci/applications/luci-app-argon-config
 rm -rf feeds/luci/applications/luci-app-mosdns
+rm -rf feeds/packages/net/v2ray-geodata
 
 # 克隆插件包到 package/目录
 mkdir -p package/community
@@ -22,7 +23,6 @@ git clone --depth=1 https://github.com/jerrykuku/luci-theme-argon
 git clone --depth=1 https://github.com/jerrykuku/luci-app-argon-confi
 git clone --depth=1 https://github.com/y9858/luci-theme-opentomca
 git clone --depth=1 -b lede https://github.com/pymumu/luci-app-smartdns
-git clone --depth=1 https://github.com/pymumu/openwrt-smartdns
 git clone --depth=1 https://github.com/lisaac/luci-app-diskman
 git clone --depth=1 https://github.com/gdy666/luci-app-lucky
 git clone --depth=1 https://github.com/sirpdboy/netspeedtest
@@ -37,10 +37,11 @@ git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall
 popd
 
 # 克隆其它仓库
-rm -rf feeds/packages/net/v2ray-geodata
 git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
 git clone --depth=1 https://github.com/vernesong/OpenClash.git package/luci-app-openclash
+git clone --depth=1 https://github.com/pymumu/openwrt-smartdns package/smartdns
+git clone --depth=1 https://github.com/Siriling/5G-Modem-Support && rm -rf 5G-Modem-Support/rooter
 
 # 更改默认主题
 if [ -f "./feeds/luci/collections/luci/Makefile" ]; then
