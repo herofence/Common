@@ -32,15 +32,15 @@ git clone --depth=1 -b openwrt-18.06 https://github.com/tty228/luci-app-wechatpu
 git clone --depth=1 https://github.com/ilxp/luci-app-ikoolproxy
 git clone --depth=1 https://github.com/esirplayground/luci-app-poweroff
 git clone --depth=1 https://github.com/Jason6111/luci-app-netdata
-git clone --depth=1 https://github.com/vernesong/OpenClash
 git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall-packages
 git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall
 popd
 
-# add luci-app-mosdns
+# 克隆其它仓库
 rm -rf feeds/packages/net/v2ray-geodata
 git clone https://github.com/sbwml/luci-app-mosdns -b v5 package/mosdns
 git clone https://github.com/sbwml/v2ray-geodata package/v2ray-geodata
+git clone --depth=1 https://github.com/vernesong/OpenClash.git package/luci-app-openclash
 
 # 更改默认主题
 if [ -f "./feeds/luci/collections/luci/Makefile" ]; then
