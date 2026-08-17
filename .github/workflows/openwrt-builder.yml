@@ -111,21 +111,14 @@ jobs:
         touch release.txt
         echo "
         🍁 注意事项：首次使用建议全新刷写
-          
         💻 适用机型: 斐讯N1
-
         📂 源码: ${{ env.REPO_URL }}
-
         🌳 分支: ${{ env.REPO_BRANCH }}
-
         ⏱️ 编译时间: $(date +"%Y年%m月%d日%H时%M分")
-
         🌐 管理地址: 192.168.2.254
-
         👤 用户名: root
-
         🔒 密码: password 
-        
+    
         " >> release.txt
         echo "tag_status=success" >> $GITHUB_ENV
 
