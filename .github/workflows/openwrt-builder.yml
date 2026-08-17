@@ -2,7 +2,7 @@ name: Build ImmortalWrt for N1
 
 on:
   workflow_dispatch:
-   inputs:
+    inputs:
       ssh:
         description: 'SSH connection to Actions'
         required: true
@@ -104,21 +104,35 @@ jobs:
         openwrt_size: 256/1024
         builder_name: innmonkey
 
+    - name: 整理配置文件
+      if: steps.compile.outputs.status == 'success'
+      run: |
+        # 将 openwrt 中的 .config 复制为 build.config 放入打包输出路径
+        cp -f openwrt/.config ${{ env.PACKAGED_OUTPUTPATH }}/build.config
+        
+        # 查找 OpenWrt 生成的 config.buildinfo 并复制到打包输出路径
+        if [ -f openwrt/bin/targets/armsr/armv8/config.buildinfo ]; then
+          cp -f openwrt/bin/targets/armsr/armv8/config.buildinfo ${{ env.PACKAGED_OUTPUTPATH }}/config.buildinfo
+        else
+          # 如果不存在则根据当前的 .config 现场生成一份
+          cp -f openwrt/.config ${{ env.PACKAGED_OUTPUTPATH }}/config.buildinfo
+        fi
+
     - name: 生成发布标签
       if: steps.compile.outputs.status == 'success'
       run: |
         echo "release_tag=$(date +"%Y.%m.%d-%H.%M")" >> ${GITHUB_OUTPUT}
         touch release.txt
         echo "
-        🍁 注意事项：首次使用建议全新刷写
-        💻 适用机型: 斐讯N1
-        📂 源码: ${{ env.REPO_URL }}
-        🌳 分支: ${{ env.REPO_BRANCH }}
-        ⏱️ 编译时间: $(date +"%Y年%m月%d日%H时%M分")
-        🌐 管理地址: 192.168.2.254
-        👤 用户名: root
-        🔒 密码: password 
-    
+        ?? 注意事项：首次使用建议全新刷写
+        ?? 适用机型: 斐讯N1
+        ?? 源码: ${{ env.REPO_URL }}
+        ?? 分支: ${{ env.REPO_BRANCH }}
+        ?? 编译时间: $(date +"%Y年%m月%d日%H时%M分")
+        ?? 管理地址: 192.168.2.254
+        ?? 用户名: root
+        ?? 密码: password 
+        
         " >> release.txt
         echo "tag_status=success" >> $GITHUB_ENV
 
@@ -127,7 +141,10 @@ jobs:
       if: steps.compile.outputs.status == 'success'
       with:
         tag_name: OpenWrt_${{ env.PACKAGED_OUTPUTDATE }}
-        files: ${{ env.PACKAGED_OUTPUTPATH }}/*.img.gz
+        files: |
+          ${{ env.PACKAGED_OUTPUTPATH }}/*.img.gz
+          ${{ env.PACKAGED_OUTPUTPATH }}/build.config
+          ${{ env.PACKAGED_OUTPUTPATH }}/config.buildinfo
         body_path: release.txt
         token: ${{ env.GITHUB_TOKEN }}
 
