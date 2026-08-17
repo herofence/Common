@@ -10,6 +10,7 @@ env:
   # 使用稳定的 24.10 分支，避免 master 分支的剧烈变动
   REPO_BRANCH: openwrt-24.10
   CONFIG_FILE: configs/openwrt.config
+  ENV_SH: scripts/environment.sh
   DIY_P1_SH: scripts/diy-part1.sh
   DIY_P2_SH: scripts/diy-part2.sh
   THEME_SETTING_SH: scripts/theme-setting.sh
