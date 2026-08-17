@@ -84,6 +84,7 @@ jobs:
         find dl -size -1k -exec rm -f {} \;
 
     - name: 编译固件
+      id: compile
       run: |
         chmod -R 755 openwrt
         cd openwrt
