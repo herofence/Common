@@ -22,7 +22,7 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
 
     steps:
     - name: 容量设置
@@ -34,50 +34,48 @@ jobs:
         remove-android: 'true'
         remove-haskell: 'true'
         remove-codeql: 'true'
-        
+
     - name: 查看项目代码
       uses: actions/checkout@main
       with:
           fetch-depth: 0
-          
+
     - name: 清理缓存
       run: |
         echo "Cleaning previous build artifacts and caches..."
         sudo rm -rf $GITHUB_WORKSPACE/openwrt || true
         sudo rm -rf $RUNNER_TEMP/* || true
-        sudo rm -rf $RUNNER_TOOL_CACHE/* || true
+        # 注意：不要删除 RUNNER_TOOL_CACHE，否则会丢失 Go 等预装工具链
         sudo apt-get -qq clean || true
         sudo rm -rf /var/lib/apt/lists/* || true
         rm -rf ~/.cache/* || true
         echo "Cache cleanup complete."
-        
+
     - name: 初始化编译环境
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
-       sudo -E apt-get -qq update
-       sudo -E apt-get -qq install build-essential clang flex g++ gawk gcc-multilib gettext git libncurses5-dev libssl-dev rsync unzip zlib1g-dev swig libpython3-dev aria2 jq subversion qemu-utils ccache rename libelf-dev
-       sudo -E apt-get -qq purge azure-cli ghc* zulu* hhvm llvm* firefox powershell openjdk* dotnet* google* mysql* php* android* rename speedtest-cli || true
-       sudo rm -rf /etc/apt/sources.list.d/* /usr/share/dotnet /usr/local/lib/android /opt/ghc
-       sudo -E apt-get -qq autoremove --purge
-       sudo -E apt-get -qq clean
-       sudo timedatectl set-timezone "$TZ"
-        
+        sudo -E apt-get -qq update
+        sudo -E apt-get -qq install -y $(curl -fsSL https://raw.githubusercontent.com/nantayo/My-Pkg/master/openwrt)
+        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq clean
+        sudo timedatectl set-timezone "$TZ"
+
     - name: 系统信息
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
         chmod +x $OPENWRT_NAME/*.sh
         $GITHUB_WORKSPACE/$OPENWRT_NAME/system-Information.sh
-        
+
     - name: 下载源码
       run: |
         git clone --depth 1 $REPO_URL -b $REPO_BRANCH openwrt
         cd openwrt
-         echo 'src-git istore https://github.com/linkease/istore;main' >> feeds.conf.default
-         echo 'src-git nas https://github.com/linkease/nas-packages.git;master' >> feeds.conf.default
-         echo 'src-git nas_luci https://github.com/linkease/nas-packages-luci.git;main' >> feeds.conf.default
-         echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
+        echo 'src-git istore https://github.com/linkease/istore;main' >> feeds.conf.default
+        echo 'src-git nas https://github.com/linkease/nas-packages.git;master' >> feeds.conf.default
+        echo 'src-git nas_luci https://github.com/linkease/nas-packages-luci.git;main' >> feeds.conf.default
+        echo "OPENWRT_PATH=$PWD" >> $GITHUB_ENV
         # 获取源码提交信息
         COMMIT_AUTHOR=$(git show -s --date=short --format="作者: %an" 2>/dev/null || echo "作者: 未知")
         echo "COMMIT_AUTHOR=$COMMIT_AUTHOR" >> $GITHUB_ENV
@@ -92,15 +90,14 @@ jobs:
       working-directory: ./openwrt
       run: |
         ./scripts/feeds update -a
-        #修复 dockerd 编译问题
-        curl -fsSL https://raw.githubusercontent.com/openwrt/packages/-24.10/utils/dockerd/Makefile -o feeds/packages/utils/dockerd/Makefile
-        curl -fsSL https://raw.githubusercontent.com/openwrt/packages/-24.10/utils/containerd/Makefile -o feeds/packages/utils/containerd/Makefile
+        # 注意：不要使用之前错误的 URL 覆盖 dockerd/containerd Makefile
+        # 直接使用 feeds 自带的版本即可
         echo >> feeds.conf.default
         ./scripts/feeds install -a -p nas
         ./scripts/feeds install -a -p nas_luci
         ./scripts/feeds install -d y -p istore luci-app-store
         ./scripts/feeds install -a
-                
+
     - name: 加载默认配置
       run: |
         chmod +x $OPENWRT_NAME/*.sh
@@ -110,13 +107,13 @@ jobs:
         $GITHUB_WORKSPACE/$PRESET_CLASH_SH amd6
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        
+
     - name: 加载自定义配置
       run: |
         [ -e "$CONFIG_FILE" ] && cat "$CONFIG_FILE" > openwrt/.config
         chmod +x $OPENWRT_NAME/*.sh && cd openwrt
         $GITHUB_WORKSPACE/$DIY_P2_SH
-        
+
     - name: 下载安装包
       id: package
       run: |
@@ -136,7 +133,7 @@ jobs:
         make download -j$(nproc)
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
-             
+
     - name: 编译固件
       id: compile
       run: |
@@ -149,7 +146,7 @@ jobs:
         echo "date1=$(date +'%Y.%m.%d')" >> $GITHUB_ENV
         echo "date2=$(date "+%Y年%m月%d日")" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
-        
+
         # 获取内核版本
         KERNEL_VER=$(cat bin/targets/x86/64/*.manifest | grep ^kernel | head -1 | cut -d- -f2 | tr -d ' ' 2>/dev/null || echo "未知")
         echo "KERNEL_VER=$KERNEL_VER" >> $GITHUB_ENV
@@ -164,10 +161,10 @@ jobs:
       if: ${{ env.UPLOAD_FIRMWARE == 'true' && !cancelled() }}
       run: |
         cd openwrt/bin/targets/x86/64
-        
+
         # 复制 build.config 和 config.buildinfo 到固件目录
         [ -f "$OPENWRT_PATH/.config" ] && cp "$OPENWRT_PATH/.config" build.config
-        
+
         # 生成 config.buildinfo 文件
         cat > config.buildinfo << EOF
         CONFIG_TARGET_BOARD=${{ env.DEVICE_TARGET }}
@@ -177,21 +174,21 @@ jobs:
         CONFIG_REPO_BRANCH=${{ env.REPO_BRANCH }}
         CONFIG_BUILD_DATE=${{ env.date1 }}
         CONFIG_BUILD_NUMBER=${{ github.run_number }}
-        CONFIG_RANDOM_CODE=${{ steps.random.outputs.random_code }}
+        CONFIG_RANDOM_CODE=${{ github.run_number }}
         EOF
-        
+
         # 清理不需要的文件，但保留固件和配置文件
         echo "清理不需要的文件..."
         rm -rf packages
         rm -f *rootfs.tar.gz *rootfs.img.gz *combined.img.gz *.bin *.json sha256sums *.manifest
-        
+
         # 列出最终保留的文件
         echo "最终保留的文件："
         ls -lah
-        
+
         echo "FIRMWARE=$PWD" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
-        
+
     - name: 上传固件
       uses: actions/upload-artifact@main
       if: steps.organize.outputs.status == 'success' && !cancelled()
@@ -220,7 +217,7 @@ jobs:
         - ${{ env.COMMIT_AUTHOR }}
         EOF
         echo "status=success" >> $GITHUB_OUTPUT
-        
+
     - name: 发布说明
       uses: softprops/action-gh-release@v1
       if: steps.tag.outputs.status == 'success' && !cancelled()
