@@ -41,17 +41,6 @@ jobs:
       with:
           fetch-depth: 0
 
-    - name: 清理缓存
-      run: |
-        echo "Cleaning previous build artifacts and caches..."
-        sudo rm -rf $GITHUB_WORKSPACE/openwrt || true
-        sudo rm -rf $RUNNER_TEMP/* || true
-        # 注意：不要删除 RUNNER_TOOL_CACHE，否则会丢失 Go 等预装工具链
-        sudo apt-get -qq clean || true
-        sudo rm -rf /var/lib/apt/lists/* || true
-        rm -rf ~/.cache/* || true
-        echo "Cache cleanup complete."
-
     - name: 初始化编译环境
       env:
         DEBIAN_FRONTEND: noninteractive
