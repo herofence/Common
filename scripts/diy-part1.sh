@@ -45,9 +45,8 @@ git clone --depth=1 https://github.com/vernesong/OpenClash.git package/luci-app-
 git clone --depth=1 https://github.com/pymumu/openwrt-smartdns package/smartdns
 
 # 更改默认主题
-if [ -f "./feeds/luci/collections/luci/Makefile" ]; then
-    sed -i "s/luci-theme-bootstrap/luci-theme-argon/g" ./feeds/luci/collections/luci/Makefile
-fi
+sed -i 's/luci-theme-design/luci-theme-argon/g' feeds/luci/collections/luci/Makefile
+sed -i 's/luci-theme-bootstrap/luci-theme-argon/g' feeds/luci/collections/luci/Makefile
 
 # x86 型号只显示 CPU 型号
 if [ -f "package/immortalwrt/autocore/files/x86/autocore" ]; then
