@@ -127,7 +127,6 @@ jobs:
       id: compile
       run: |
         cd openwrt
-        # 开启 Go 模块自动补全与动态工具链，防止本地 Go 依赖缺失
         export GO111MODULE=on
         export GOTOOLCHAIN=auto
         echo -e "$(nproc) thread compile"
