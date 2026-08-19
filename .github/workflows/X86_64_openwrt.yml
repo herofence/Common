@@ -7,8 +7,7 @@ on:
 
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
-  # 使用稳定的 24.10 分支，避免 master 分支的剧烈变动
-  REPO_BRANCH: openwrt-24.10
+  REPO_BRANCH: openwrt-25.12
   CONFIG_FILE: configs/openwrt.config
   ENV_SH: scripts/environment.sh
   DIY_P1_SH: scripts/diy-part1.sh
@@ -41,14 +40,24 @@ jobs:
       with:
           fetch-depth: 0
 
+    - name: 清理磁盘空间
+      uses: jlumbroso/free-disk-space@main
+      with:
+        tool-cache: false
+        android: true
+        dotnet: true
+        haskell: true
+        large-packages: true
+        docker-images: true
+        swap-storage: true
+
     - name: 初始化编译环境
       env:
         DEBIAN_FRONTEND: noninteractive
       run: |
         sudo -E apt-get -qq update > /dev/null
-        sudo -E apt-get -qq full-upgrade > /dev/null
-        chmod +x $ENV_SH && $ENV_SH
-        sudo -E apt-get -qq autoremove --purge
+        sudo -E apt-get -qq install -y $(curl -fsSL https://raw.githubusercontent.com/nantayo/My-Pkg/master/openwrt) > /dev/null
+        sudo -E apt-get -qq autoremove --purge > /dev/null
         sudo -E apt-get -qq clean > /dev/null
         sudo timedatectl set-timezone "$TZ"
 
