@@ -8,10 +8,9 @@ on:
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
   REPO_BRANCH: openwrt-25.12
-  CONFIG_FILE: configs/openwrt.config
+  CONFIG_FILE: N1/.config
   ENV_SH: scripts/environment.sh
-  DIY_P1_SH: scripts/diy-part1.sh
-  DIY_P2_SH: scripts/diy-part2.sh
+  DIY_P1_SH: N1/diy.sh
   THEME_SETTING_SH: scripts/theme-setting.sh
   PRESET_CLASH_SH: scripts/preset-clash-core.sh
   UPLOAD_FIRMWARE: true
@@ -107,12 +106,6 @@ jobs:
         $GITHUB_WORKSPACE/$PRESET_CLASH_SH amd6
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-    - name: 加载自定义配置
-      run: |
-        [ -e "$CONFIG_FILE" ] && cat "$CONFIG_FILE" > openwrt/.config
-        chmod +x $OPENWRT_NAME/*.sh && cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P2_SH
 
     - name: 下载安装包
       id: package
