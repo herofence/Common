@@ -1,4 +1,6 @@
 #!/bin/bash
+# 修改默认IP
+sed -i 's/192.168.1.1/192.168.2.1/g' package/base-files/files/bin/config_generate
 # 设置 Git 使用 token 认证（如果存在）
 if [ -n "${GITHUB_TOKEN}" ]; then
     git config --global url."https://oauth2:${GITHUB_TOKEN}@github.com/".insteadOf "https://github.com/"
