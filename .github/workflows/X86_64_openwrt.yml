@@ -10,7 +10,7 @@ env:
   REPO_BRANCH: openwrt-25.12
   CONFIG_FILE: configs/openwrt.config
   ENV_SH: scripts/environment.sh
-  DIY_P1_SH: N1/diy.sh
+  DIY_P1_SH: scripts/diy-part1.sh
   THEME_SETTING_SH: scripts/theme-setting.sh
   PRESET_CLASH_SH: scripts/preset-clash-core.sh
   UPLOAD_FIRMWARE: true
