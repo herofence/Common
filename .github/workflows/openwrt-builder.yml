@@ -2,7 +2,7 @@ name: Build ImmortalWrt for N1
 
 on:
   workflow_dispatch:
-    inputs:
+   inputs:
       ssh:
         description: 'SSH connection to Actions'
         required: true
@@ -17,7 +17,7 @@ env:
   DIY_SH: N1/diy.sh
   FILES: N1/files
   TZ: Asia/Shanghai
-  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  GITHUB_TOKEN: ${{ secrets.TOKEN }}
 
 jobs:
   build:
@@ -84,7 +84,6 @@ jobs:
         find dl -size -1k -exec rm -f {} \;
 
     - name: 编译固件
-      id: compile
       run: |
         chmod -R 755 openwrt
         cd openwrt
@@ -104,34 +103,27 @@ jobs:
         openwrt_size: 256/1024
         builder_name: innmonkey
 
-    - name: 整理配置文件
-      if: steps.compile.outputs.status == 'success'
-      run: |
-        # 将 openwrt 中的 .config 复制为 build.config 放入打包输出路径
-        cp -f openwrt/.config ${{ env.PACKAGED_OUTPUTPATH }}/build.config
-        
-        # 查找 OpenWrt 生成的 config.buildinfo 并复制到打包输出路径
-        if [ -f openwrt/bin/targets/armsr/armv8/config.buildinfo ]; then
-          cp -f openwrt/bin/targets/armsr/armv8/config.buildinfo ${{ env.PACKAGED_OUTPUTPATH }}/config.buildinfo
-        else
-          # 如果不存在则根据当前的 .config 现场生成一份
-          cp -f openwrt/.config ${{ env.PACKAGED_OUTPUTPATH }}/config.buildinfo
-        fi
-
     - name: 生成发布标签
       if: steps.compile.outputs.status == 'success'
       run: |
         echo "release_tag=$(date +"%Y.%m.%d-%H.%M")" >> ${GITHUB_OUTPUT}
         touch release.txt
         echo "
-        ?? 注意事项：首次使用建议全新刷写
-        ?? 适用机型: 斐讯N1
-        ?? 源码: ${{ env.REPO_URL }}
-        ?? 分支: ${{ env.REPO_BRANCH }}
-        ?? 编译时间: $(date +"%Y年%m月%d日%H时%M分")
-        ?? 管理地址: 192.168.2.254
-        ?? 用户名: root
-        ?? 密码: password 
+        🍁 注意事项：首次使用建议全新刷写
+          
+        💻 适用机型: 斐讯N1
+
+        📂 源码: ${{ env.REPO_URL }}
+
+        🌳 分支: ${{ env.REPO_BRANCH }}
+
+        ⏱️ 编译时间: $(date +"%Y年%m月%d日%H时%M分")
+
+        🌐 管理地址: 192.168.2.254
+
+        👤 用户名: root
+
+        🔒 密码: password 
         
         " >> release.txt
         echo "tag_status=success" >> $GITHUB_ENV
@@ -141,10 +133,7 @@ jobs:
       if: steps.compile.outputs.status == 'success'
       with:
         tag_name: OpenWrt_${{ env.PACKAGED_OUTPUTDATE }}
-        files: |
-          ${{ env.PACKAGED_OUTPUTPATH }}/*.img.gz
-          ${{ env.PACKAGED_OUTPUTPATH }}/build.config
-          ${{ env.PACKAGED_OUTPUTPATH }}/config.buildinfo
+        files: ${{ env.PACKAGED_OUTPUTPATH }}/*.img.gz
         body_path: release.txt
         token: ${{ env.GITHUB_TOKEN }}
 
@@ -156,8 +145,7 @@ jobs:
         token: ${{ env.GITHUB_TOKEN }}
 
     - name: 删除自动发布的旧固件
-      uses: dev-drprasad/delete-older-releases@v0.3.0
+      uses: Nats-ji/delete-old-releases@v1
       with:
         token: ${{ env.GITHUB_TOKEN }}
-        keep_latest: 15
-        delete_tags: true
+        keep-count: 3  # 保留最新的3个Release
