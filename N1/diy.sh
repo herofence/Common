@@ -3,6 +3,7 @@
 # Remove packages
 #rm -rf feeds/packages/net/v2ray-geodata
 #rm -rf feeds/luci/applications/luci-app-daed
+rm -rf package/openwrt-clashoo
 
 #去除自动升级
 sed -i '/luci-app-attendedsysupgrade/d' feeds/luci/collections/luci/Makefile
@@ -19,6 +20,7 @@ git clone https://github.com/kenzok8/openwrt-clashoo.git package/openwrt-clashoo
 #git_sparse_clone main https://github.com/kiddin9/kwrt-packages luci-app-onliner
 #git_sparse_clone https://github.com/VIKINGYFY/packages luci-app-homeproxy
 #git clone https://github.com/QiuSimons/luci-app-daed package/daed
+git clone --depth=1 -b master https://github.com/vernesong/OpenClash.git package/luci-app-openclash
 
 # 加入OpenClash核心
 #chmod -R a+x $GITHUB_WORKSPACE/preset-clash-core.sh
