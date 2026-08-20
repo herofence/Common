@@ -101,6 +101,7 @@ jobs:
       run: |
         chmod +x $DIY_P1_SH $OPENWRT_NAME/*.sh
         cd openwrt
+        cp $GITHUB_WORKSPACE/$CONFIG_FILE .config
         bash $GITHUB_WORKSPACE/$DIY_P1_SH
         bash $GITHUB_WORKSPACE/$THEME_SETTING_SH
         bash $GITHUB_WORKSPACE/$PRESET_CLASH_SH amd6
@@ -141,7 +142,7 @@ jobs:
       id: organize
       if: ${{ env.UPLOAD_FIRMWARE == 'true' && !cancelled() }}
       run: |
-        cd openwrt/bin/targets/x86/64
+        cd openwrt/bin/targets/${{ env.DEVICE_TARGET }}/${{ env.DEVICE_SUBTARGET }}
 
         # 复制 build.config 和 config.buildinfo 到固件目录
         [ -f "$OPENWRT_PATH/.config" ] && cp "$OPENWRT_PATH/.config" build.config
