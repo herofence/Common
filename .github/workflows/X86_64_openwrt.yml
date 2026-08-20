@@ -99,11 +99,11 @@ jobs:
 
     - name: 加载默认配置
       run: |
-        chmod +x $OPENWRT_NAME/*.sh
+        chmod +x $DIY_P1_SH $OPENWRT_NAME/*.sh
         cd openwrt
-        $GITHUB_WORKSPACE/$DIY_P1_SH
-        $GITHUB_WORKSPACE/$THEME_SETTING_SH
-        $GITHUB_WORKSPACE/$PRESET_CLASH_SH amd6
+        bash $GITHUB_WORKSPACE/$DIY_P1_SH
+        bash $GITHUB_WORKSPACE/$THEME_SETTING_SH
+        bash $GITHUB_WORKSPACE/$PRESET_CLASH_SH amd6
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
