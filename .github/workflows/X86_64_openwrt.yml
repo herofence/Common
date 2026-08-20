@@ -3,7 +3,7 @@ name: immortalwrt_x86_64
 on:
   workflow_dispatch:
   schedule:
-   - cron: 0 19 * * THU
+    - cron: 0 19 * * THU
 
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
@@ -37,7 +37,7 @@ jobs:
     - name: 查看项目代码
       uses: actions/checkout@main
       with:
-          fetch-depth: 0
+        fetch-depth: 0
 
     - name: 清理磁盘空间
       uses: jlumbroso/free-disk-space@main
@@ -89,8 +89,6 @@ jobs:
       working-directory: ./openwrt
       run: |
         ./scripts/feeds update -a
-        # 注意：不要使用之前错误的 URL 覆盖 dockerd/containerd Makefile
-        # 直接使用 feeds 自带的版本即可
         echo >> feeds.conf.default
         ./scripts/feeds install -a -p nas
         ./scripts/feeds install -a -p nas_luci
@@ -101,7 +99,7 @@ jobs:
       run: |
         chmod +x $DIY_P1_SH $OPENWRT_NAME/*.sh
         cd openwrt
-        cp $GITHUB_WORKSPACE/$CONFIG_FILE .config
+        [ -f "$GITHUB_WORKSPACE/$CONFIG_FILE" ] && cp "$GITHUB_WORKSPACE/$CONFIG_FILE" .config
         bash $GITHUB_WORKSPACE/$DIY_P1_SH
         bash $GITHUB_WORKSPACE/$THEME_SETTING_SH
         bash $GITHUB_WORKSPACE/$PRESET_CLASH_SH amd6
@@ -129,10 +127,9 @@ jobs:
         echo "date2=$(date "+%Y年%m月%d日")" >> $GITHUB_ENV
         echo "status=success" >> $GITHUB_OUTPUT
 
-        # 获取内核版本
+        # 获取内核版本与平台信息
         KERNEL_VER=$(cat bin/targets/x86/64/*.manifest | grep ^kernel | head -1 | cut -d- -f2 | tr -d ' ' 2>/dev/null || echo "未知")
         echo "KERNEL_VER=$KERNEL_VER" >> $GITHUB_ENV
-        # 获取平台信息
         DEVICE_TARGET=$(cat .config | grep CONFIG_TARGET_BOARD | awk -F '"' '{print $2}' 2>/dev/null || echo "x86")
         echo "DEVICE_TARGET=$DEVICE_TARGET" >> $GITHUB_ENV
         DEVICE_SUBTARGET=$(cat .config | grep CONFIG_TARGET_SUBTARGET | awk -F '"' '{print $2}' 2>/dev/null || echo "64")
@@ -144,7 +141,7 @@ jobs:
       run: |
         cd openwrt/bin/targets/${{ env.DEVICE_TARGET }}/${{ env.DEVICE_SUBTARGET }}
 
-        # 复制 build.config 和 config.buildinfo 到固件目录
+        # 复制配置文件
         [ -f "$OPENWRT_PATH/.config" ] && cp "$OPENWRT_PATH/.config" build.config
 
         # 生成 config.buildinfo 文件
@@ -159,12 +156,11 @@ jobs:
         CONFIG_RANDOM_CODE=${{ github.run_number }}
         EOF
 
-        # 清理不需要的文件，但保留固件和配置文件
+        # 清理无用文件（修复：保留 x86 的 *.img.gz 和 *.bin 固件）
         echo "清理不需要的文件..."
         rm -rf packages
-        rm -f *rootfs.tar.gz *rootfs.img.gz *combined.img.gz *.bin *.json sha256sums *.manifest
+        rm -f *rootfs.tar.gz *.json sha256sums *.manifest
 
-        # 列出最终保留的文件
         echo "最终保留的文件："
         ls -lah
 
@@ -201,7 +197,7 @@ jobs:
         echo "status=success" >> $GITHUB_OUTPUT
 
     - name: 发布说明
-      uses: softprops/action-gh-release@v1
+      uses: softprops/action-gh-release@v2
       if: steps.tag.outputs.status == 'success' && !cancelled()
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
