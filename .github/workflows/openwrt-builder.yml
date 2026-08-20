@@ -13,8 +13,8 @@ on:
 env:
   REPO_URL: https://github.com/immortalwrt/immortalwrt
   REPO_BRANCH: openwrt-25.12
-  CONFIG_FILE: configs/openwrt.config
-  DIY_SH: scripts/diy-part1.sh
+  CONFIG_FILE: N1/.config
+  DIY_SH: N1/diy.sh
   FILES: N1/files
   TZ: Asia/Shanghai
   GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
